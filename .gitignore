@@ -14,6 +14,11 @@ coverage
 logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+anvil.log
+
+# process ids
+*.pid
+.anvil.pid
 
 # dotenv environment variable files
 .env

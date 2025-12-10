@@ -9,7 +9,11 @@
   "scripts": {
     "dev": "bun run index.ts",
     "start": "bun run index.ts",
-    "test": "bun test ./tests --exclude alkahest-ts/** "
+    "test": "bun test ./tests --exclude alkahest-ts/** ",
+    "setup": "./scripts/dev.sh",
+    "deploy": "./scripts/deploy.sh",
+    "oracle": "./scripts/start-oracle.sh",
+    "stop": "./scripts/stop.sh"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
