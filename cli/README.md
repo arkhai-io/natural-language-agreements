@@ -1,0 +1,182 @@
+# Natural Language Agreement CLI Tools
+
+User-friendly command-line tools to interact with Natural Language Agreement escrows.
+
+## Quick Start
+
+### 1. Create an Escrow
+
+Create an escrow with a natural language demand:
+
+```bash
+bun run escrow:create \
+  --demand "The sky is blue" \
+  --amount 10 \
+  --token <TOKEN_ADDRESS_FROM_DEPLOYMENT> \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+
+> **Note:** Get the token address from the deployment output. The deployment creates 3 test tokens (TSTA, TSTB, TSTC) and distributes 10,000 of each to all test accounts.
+
+**Save the Escrow UID** from the output!
+
+### 2. Fulfill the Escrow
+
+Someone else (or you with a different key) can fulfill it:
+
+```bash
+bun run escrow:fulfill \
+  --escrow-uid 0x... \
+  --fulfillment "The sky appears blue today" \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \
+  --private-key 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+```
+
+**Save the Fulfillment UID** from the output!
+
+### 3. Wait for Oracle
+
+The oracle will automatically arbitrate the fulfillment (a few seconds).
+
+### 4. Collect the Escrow
+
+If approved, collect the escrowed tokens:
+
+```bash
+bun run escrow:collect \
+  --escrow-uid 0x... \
+  --fulfillment-uid 0x... \
+  --private-key 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+```
+
+## Commands
+
+### Create Escrow
+
+```bash
+bun run escrow:create [options]
+
+Options:
+  --demand <text>              Natural language demand (required)
+  --amount <number>            Amount of tokens to escrow (required)
+  --token <address>            ERC20 token address (required)
+  --oracle <address>           Oracle address (required)
+  --private-key <key>          Your private key (required)
+  --deployment <path>          Deployment file (default: ./deployments/localhost.json)
+  --rpc-url <url>              RPC URL (default: from deployment)
+  --help, -h                   Show help
+```
+
+### Fulfill Escrow
+
+```bash
+bun run escrow:fulfill [options]
+
+Options:
+  --escrow-uid <uid>           Escrow UID to fulfill (required)
+  --fulfillment <text>         Your fulfillment text (required)
+  --oracle <address>           Oracle address (required)
+  --private-key <key>          Your private key (required)
+  --deployment <path>          Deployment file (default: ./deployments/localhost.json)
+  --rpc-url <url>              RPC URL (default: from deployment)
+  --help, -h                   Show help
+```
+
+### Collect Escrow
+
+```bash
+bun run escrow:collect [options]
+
+Options:
+  --escrow-uid <uid>           Escrow UID (required)
+  --fulfillment-uid <uid>      Approved fulfillment UID (required)
+  --private-key <key>          Your private key (required)
+  --deployment <path>          Deployment file (default: ./deployments/localhost.json)
+  --rpc-url <url>              RPC URL (default: from deployment)
+  --help, -h                   Show help
+```
+
+## Default Anvil Accounts
+
+For local testing, use these default Anvil accounts:
+
+```bash
+# Account #0 (Alice - Escrow Creator)
+Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+# Account #1 (Bob - Oracle & Fulfiller)
+Address: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+
+# Account #2 (Charlie - Alternative user)
+Address: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+```
+
+## Environment Variables
+
+Instead of using `--private-key` every time, set:
+
+```bash
+export PRIVATE_KEY=0x...
+export OPENAI_API_KEY=sk-...  # Required for oracle
+```
+
+## Example Workflow
+
+```bash
+# Terminal 1: Start the system
+bun run setup
+
+# Note the token addresses from the deployment output!
+# Example: Token A (TSTA): 0x5FbDB...
+
+# Terminal 2: Create an escrow (as Alice)
+export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+bun run escrow:create \
+  --demand "Deliver package by Friday" \
+  --amount 100 \
+  --token 0x5FbDB... \  # Use Token A address from deployment
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+
+# Save the escrow UID, e.g.: 0x1234...
+
+# Terminal 2: Fulfill the escrow (as Bob)
+export PRIVATE_KEY=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+bun run escrow:fulfill \
+  --escrow-uid 0x1234... \
+  --fulfillment "Package delivered on Thursday" \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+
+# Save the fulfillment UID, e.g.: 0x5678...
+
+# Watch Terminal 1 - oracle will arbitrate automatically!
+
+# Terminal 2: Collect the escrow (as Bob)
+bun run escrow:collect \
+  --escrow-uid 0x1234... \
+  --fulfillment-uid 0x5678...
+```
+
+## Troubleshooting
+
+**"Deployment file not found"**
+- Run `bun run setup` first to deploy contracts
+
+**"Account has no ETH"**
+- Fund your account with test ETH from Anvil or a faucet
+
+**"Oracle not responding"**
+- Check that the oracle is running: `ps aux | grep oracle`
+- Check oracle logs in Terminal 1
+
+**"OPENAI_API_KEY not set"**
+- The oracle needs OpenAI to arbitrate
+- Set in `.env` file or export it
+
+## See Also
+
+- [Main README](../README.md) - Full documentation
+- [Quick Start](../QUICKSTART.md) - 2-minute setup guide

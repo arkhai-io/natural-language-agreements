@@ -158,10 +158,12 @@ async function main() {
         // Import necessary artifacts
         const EAS = await import(`${alkahestPath}/tests/fixtures/EAS.json`);
         const SchemaRegistry = await import(`${alkahestPath}/tests/fixtures/SchemaRegistry.json`);
+        const MockERC20Permit = await import(`${alkahestPath}/tests/fixtures/MockERC20Permit.json`);
         const TrustedOracleArbiter = await import(`${contractsPath}/TrustedOracleArbiter.json`);
         const StringObligation = await import(`${contractsPath}/StringObligation.json`);
         const ERC20EscrowObligation = await import(`${contractsPath}/ERC20EscrowObligation.json`);
         const ERC20PaymentObligation = await import(`${contractsPath}/ERC20PaymentObligation.json`);
+        const ERC20BarterCrossToken = await import(`${contractsPath}/ERC20BarterCrossToken.json`);
 
         console.log("✅ Contract artifacts loaded\n");
 
@@ -244,6 +246,88 @@ async function main() {
             [addresses.eas, addresses.easSchemaRegistry]
         );
 
+        // Deploy barter utils (required for permitAndBuyWithErc20)
+        console.log("🔄 Deploying barter utils...\n");
+
+        addresses.erc20BarterUtils = await deployContract(
+            "ERC20 Barter Utils",
+            ERC20BarterCrossToken.abi,
+            ERC20BarterCrossToken.bytecode.object,
+            [
+                addresses.eas,
+                addresses.erc20EscrowObligation,
+                addresses.erc20PaymentObligation,
+                "0x0000000000000000000000000000000000000000", // erc721Escrow (not used)
+                "0x0000000000000000000000000000000000000000", // erc721Payment (not used)
+                "0x0000000000000000000000000000000000000000", // erc1155Escrow (not used)
+                "0x0000000000000000000000000000000000000000", // erc1155Payment (not used)
+                "0x0000000000000000000000000000000000000000", // tokenBundleEscrow (not used)
+                "0x0000000000000000000000000000000000000000", // tokenBundlePayment (not used)
+            ]
+        );
+
+        // Deploy mock ERC20 tokens for testing
+        console.log("🪙  Deploying mock ERC20 tokens...\n");
+
+        addresses.mockERC20A = await deployContract(
+            "Mock ERC20 Token A",
+            MockERC20Permit.abi,
+            MockERC20Permit.bytecode.object,
+            ["Test Token A", "TSTA"]
+        );
+
+        addresses.mockERC20B = await deployContract(
+            "Mock ERC20 Token B",
+            MockERC20Permit.abi,
+            MockERC20Permit.bytecode.object,
+            ["Test Token B", "TSTB"]
+        );
+
+        addresses.mockERC20C = await deployContract(
+            "Mock ERC20 Token C",
+            MockERC20Permit.abi,
+            MockERC20Permit.bytecode.object,
+            ["Test Token C", "TSTC"]
+        );
+
+        // Distribute tokens to known Anvil accounts for testing
+        if (network === "localhost") {
+            console.log("💸 Distributing tokens to test accounts...\n");
+            
+            // Get Anvil test accounts dynamically
+            const testAccounts = await client.request({
+                method: "eth_accounts",
+            }) as `0x${string}`[];
+            
+            // Use first 3 accounts
+            const recipients = testAccounts.slice(0, 3);
+
+            for (const testAccount of recipients) {
+                // Skip if it's the deployer account
+                if (testAccount.toLowerCase() === account.address.toLowerCase()) {
+                    continue;
+                }
+                
+                // Transfer 10000 tokens to each account
+                for (const [tokenName, tokenAddress] of [
+                    ["Token A", addresses.mockERC20A],
+                    ["Token B", addresses.mockERC20B],
+                    ["Token C", addresses.mockERC20C],
+                ]) {
+                    const hash = await client.writeContract({
+                        address: tokenAddress as `0x${string}`,
+                        abi: MockERC20Permit.abi,
+                        functionName: "transfer",
+                        args: [testAccount, parseEther("10000")],
+                    });
+                    await client.waitForTransactionReceipt({ hash });
+                }
+                console.log(`   ✅ Distributed tokens to ${testAccount}`);
+            }
+            
+            console.log("\n✅ Tokens distributed to test accounts\n");
+        }
+
         // Save deployment addresses
         const outputPath = args.output || resolve(`./deployments/${network}.json`);
         const outputDir = resolve(outputPath, "..");
@@ -270,12 +354,19 @@ async function main() {
             console.log(`   ${name}: ${address}`);
         });
 
+        if (network === "localhost") {
+            console.log("\n🪙  Mock ERC20 Tokens:");
+            console.log(`   Token A (TSTA): ${addresses.mockERC20A}`);
+            console.log(`   Token B (TSTB): ${addresses.mockERC20B}`);
+            console.log(`   Token C (TSTC): ${addresses.mockERC20C}`);
+            console.log("\n💰 Each test account has 10000 of each token");
+        }
+
         console.log("\n🎯 Next steps:");
-        console.log("1. Save the deployment file for your records");
-        console.log("2. Update your oracle configuration with the EAS contract address:");
-        console.log(`   export EAS_CONTRACT_ADDRESS=${addresses.eas}`);
-        console.log("3. Start the oracle:");
-        console.log(`   bun run oracle -- --rpc-url ${rpcUrl} --eas-contract ${addresses.eas}`);
+        console.log("1. Start the oracle:");
+        console.log("   ./scripts/start-oracle.sh " + network);
+        console.log("\n2. Create an escrow:");
+        console.log(`   bun run escrow:create --demand "Your demand" --amount 10 --token ${addresses.mockERC20A} --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 --private-key 0xac09...`);
 
     } catch (error) {
         console.error("❌ Deployment failed:", error);

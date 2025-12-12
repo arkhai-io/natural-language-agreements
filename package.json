@@ -13,7 +13,10 @@
     "setup": "./scripts/dev.sh",
     "deploy": "./scripts/deploy.sh",
     "oracle": "./scripts/start-oracle.sh",
-    "stop": "./scripts/stop.sh"
+    "stop": "./scripts/stop.sh",
+    "escrow:create": "bun run cli/create-escrow.ts",
+    "escrow:fulfill": "bun run cli/fulfill-escrow.ts",
+    "escrow:collect": "bun run cli/collect-escrow.ts"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
