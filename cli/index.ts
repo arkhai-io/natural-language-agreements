@@ -11,6 +11,9 @@ Usage:
 
 Commands:
   dev              Start local development environment (Anvil + Deploy + Oracle)
+  deploy           Deploy contracts to blockchain
+  start-oracle     Start the oracle service
+  stop             Stop all services (Anvil + Oracle)
   escrow:create    Create a new escrow with natural language demand
   escrow:fulfill   Fulfill an existing escrow
   escrow:collect   Collect an approved escrow
@@ -37,6 +40,15 @@ Environment Variables:
 Examples:
   # Start development environment
   nla dev
+
+  # Deploy contracts
+  nla deploy
+
+  # Start oracle
+  nla start-oracle
+
+  # Stop all services
+  nla stop
 
   # Create an escrow
   nla escrow:create \\
@@ -97,15 +109,62 @@ function parseCliArgs() {
     return { command, ...values };
 }
 
+// Shell command handler
+async function runShellCommand(scriptName: string, args: string[] = []) {
+    const { spawnSync } = await import("child_process");
+    const scriptDir = import.meta.dir;
+    const scriptPath = `${scriptDir}/scripts/${scriptName}`;
+    
+    // Run the shell script
+    const result = spawnSync(scriptPath, args, {
+        stdio: "inherit",
+        cwd: process.cwd(),
+        shell: true,
+    });
+
+    process.exit(result.status || 0);
+}
+
+// Server command handler (for deploy.ts, oracle.ts)
+async function runServerCommand(scriptName: string, args: string[] = []) {
+    const { spawnSync } = await import("child_process");
+    const scriptDir = import.meta.dir;
+    const scriptPath = `${scriptDir}/server/${scriptName}`;
+    
+    // Run the TypeScript file directly
+    const result = spawnSync("bun", ["run", scriptPath, ...args], {
+        stdio: "inherit",
+        cwd: process.cwd(),
+    });
+
+    process.exit(result.status || 0);
+}
+
 // Main function
 async function main() {
     try {
         const args = parseCliArgs();
         const command = args.command;
 
-        // Handle dev command separately (runs shell script)
+        // Handle shell script commands (dev and stop need shell for process management)
         if (command === "dev") {
-            await runDevCommand();
+            await runShellCommand("dev.sh");
+            return;
+        }
+        
+        if (command === "stop") {
+            await runShellCommand("stop.sh");
+            return;
+        }
+
+        // Handle TypeScript commands that can run directly
+        if (command === "deploy") {
+            await runServerCommand("deploy.ts", Bun.argv.slice(3));
+            return;
+        }
+        
+        if (command === "start-oracle") {
+            await runServerCommand("oracle.ts", Bun.argv.slice(3));
             return;
         }
 
@@ -150,24 +209,6 @@ async function main() {
         console.error("❌ Error:", error);
         process.exit(1);
     }
-}
-
-// Dev command handler
-async function runDevCommand() {
-    console.log("🚀 Starting development environment...\n");
-    
-    const { spawnSync } = await import("child_process");
-    const scriptDir = import.meta.dir;
-    const devScriptPath = `${scriptDir}/scripts/dev.sh`;
-    
-    // Run the dev.sh script
-    const result = spawnSync(devScriptPath, [], {
-        stdio: "inherit",
-        cwd: process.cwd(),
-        shell: true,
-    });
-
-    process.exit(result.status || 0);
 }
 
 // Status command handler

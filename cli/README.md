@@ -22,6 +22,9 @@ nla <command> [options]
 
 **Available Commands:**
 - `dev` - Start local development environment (Anvil + Deploy + Oracle)
+- `deploy` - Deploy contracts to blockchain
+- `start-oracle` - Start the oracle service
+- `stop` - Stop all services (Anvil + Oracle)
 - `escrow:create` - Create a new escrow with natural language demand
 - `escrow:fulfill` - Fulfill an existing escrow
 - `escrow:collect` - Collect an approved escrow
@@ -115,6 +118,61 @@ nla escrow:collect \
 ```
 
 ## Commands
+
+### Development Commands
+
+#### Start Development Environment
+
+```bash
+nla dev
+```
+
+Starts the complete local development environment:
+1. Starts Anvil (local Ethereum node on port 8545)
+2. Deploys all contracts
+3. Deploys and distributes mock ERC20 tokens
+4. Starts the oracle service
+
+**Keep this terminal open** - it runs the oracle!
+
+#### Deploy Contracts
+
+```bash
+nla deploy [network] [rpc-url]
+
+# Examples:
+nla deploy                                    # Deploy to localhost
+nla deploy localhost http://localhost:8545    # Specify network and RPC
+```
+
+Deploys all Alkahest contracts and mock tokens to the blockchain. Creates a deployment file at `cli/deployments/{network}.json`.
+
+#### Start Oracle
+
+```bash
+nla start-oracle [network]
+
+# Examples:
+nla start-oracle              # Start oracle for localhost
+nla start-oracle mainnet      # Start oracle for mainnet
+```
+
+Starts the oracle service that listens for arbitration requests. Requires:
+- `OPENAI_API_KEY` environment variable
+- `ORACLE_PRIVATE_KEY` environment variable (defaults to Anvil account #1)
+- Deployment file at `cli/deployments/{network}.json`
+
+#### Stop Services
+
+```bash
+nla stop
+```
+
+Stops all running services:
+- Anvil (local blockchain)
+- Oracle processes
+
+### Escrow Commands
 
 ### Create Escrow
 

@@ -49,20 +49,23 @@ Set your OpenAI API key and run everything:
 
 ```bash
 export OPENAI_API_KEY=sk-your-key-here
-./scripts/dev.sh
+nla dev
 ```
 
 This will:
 - ✅ Check all prerequisites
 - ✅ Start Anvil (local blockchain)
 - ✅ Deploy all contracts
+- ✅ Deploy and distribute mock ERC20 tokens
 - ✅ Start the oracle
 - ✅ Ready to test!
 
 To stop everything:
 ```bash
-./scripts/stop.sh
+nla stop
 ```
+
+> **Note:** If you haven't installed the CLI globally yet, run `bun link` first, or use `bun run cli/index.ts dev` instead.
 
 ### Option 2: Manual Setup (Step by Step)
 
@@ -78,16 +81,16 @@ anvil
 ```bash
 # Terminal 2: Deploy to localhost
 export OPENAI_API_KEY=sk-your-key-here
-./scripts/deploy.sh localhost
+nla deploy
 ```
 
-This creates `deployments/localhost.json` with all contract addresses.
+This creates `cli/deployments/localhost.json` with all contract addresses.
 
 #### 3. Start Oracle
 
 ```bash
 # Terminal 2 (or 3): Start oracle
-./scripts/start-oracle.sh localhost
+nla start-oracle
 ```
 
 #### 4. Test It
@@ -98,6 +101,35 @@ bun test tests/nlaOracle.test.ts
 ```
 
 Watch the oracle terminal - you'll see it process arbitration requests in real-time!
+
+## CLI Tools
+
+For a complete guide to the CLI commands, see [CLI Documentation](cli/README.md).
+
+### Quick CLI Examples
+
+```bash
+# Create an escrow
+nla escrow:create \
+  --demand "The sky is blue" \
+  --amount 10 \
+  --token 0xa513e6e4b8f2a923d98304ec87f64353c4d5c853 \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+
+# Fulfill an escrow
+nla escrow:fulfill \
+  --escrow-uid 0x... \
+  --fulfillment "The sky appears blue today" \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+
+# Check escrow status
+nla escrow:status --escrow-uid 0x...
+
+# Collect approved escrow
+nla escrow:collect \
+  --escrow-uid 0x... \
+  --fulfillment-uid 0x...
+```
 
 ## Deployment to Other Networks
 
@@ -111,10 +143,10 @@ export ORACLE_PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
 
 # 3. Deploy
-./scripts/deploy.sh sepolia https://sepolia.infura.io/v3/YOUR-KEY
+nla deploy sepolia https://sepolia.infura.io/v3/YOUR-KEY
 
 # 4. Start oracle
-./scripts/start-oracle.sh sepolia
+nla start-oracle sepolia
 ```
 
 ### Mainnet
@@ -126,19 +158,36 @@ export ORACLE_PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
 
 # Deploy
-./scripts/deploy.sh mainnet https://mainnet.infura.io/v3/YOUR-KEY
+nla deploy mainnet https://mainnet.infura.io/v3/YOUR-KEY
 
 # Start oracle (consider running as a service)
-./scripts/start-oracle.sh mainnet
+nla start-oracle mainnet
 ```
 
-## Available Scripts
+## Available Commands
+
+The `nla` CLI provides unified access to all functionality:
 
 ```bash
-./scripts/dev.sh              # Complete local setup (all-in-one)
-./scripts/deploy.sh [network] # Deploy contracts to network
-./scripts/start-oracle.sh [network]  # Start oracle for network
-./scripts/stop.sh             # Stop all services
+nla dev                       # Complete local setup (all-in-one)
+nla deploy [network] [rpc]    # Deploy contracts to network
+nla start-oracle [network]    # Start oracle for network
+nla stop                      # Stop all services
+
+nla escrow:create [options]   # Create a new escrow
+nla escrow:fulfill [options]  # Fulfill an existing escrow
+nla escrow:collect [options]  # Collect an approved escrow
+nla escrow:status [options]   # Check escrow status
+
+nla help                      # Show help
+```
+
+**NPM Scripts (alternative):**
+```bash
+bun run setup                 # Same as: nla dev
+bun run deploy                # Same as: nla deploy
+bun run oracle                # Same as: nla start-oracle
+bun run stop                  # Same as: nla stop
 ```
 
 ## Production Deployment
@@ -166,7 +215,7 @@ sudo journalctl -u nla-oracle -f
 
 ```bash
 # Start in background
-nohup ./scripts/start-oracle.sh mainnet > oracle.log 2>&1 &
+nohup nla start-oracle mainnet > oracle.log 2>&1 &
 
 # Save PID
 echo $! > oracle.pid
@@ -182,7 +231,7 @@ kill $(cat oracle.pid)
 screen -S oracle
 
 # Run oracle
-./scripts/start-oracle.sh mainnet
+nla start-oracle mainnet
 
 # Detach: Ctrl+A, then D
 # Reattach: screen -r oracle
@@ -237,18 +286,31 @@ This project was created using `bun init` in bun v1.2.20. [Bun](https://bun.com)
 
 ```
 natural-language-agreements/
-├── oracle.ts           # Oracle CLI application
-├── deploy.ts           # Contract deployment script
-├── index.ts            # Development entry point
+├── cli/                          # CLI tools and server components
+│   ├── index.ts                  # Main CLI entry point (nla command)
+│   ├── README.md                 # CLI documentation
+│   ├── client/                   # User-facing escrow tools
+│   │   ├── create-escrow.ts      # Create escrow CLI
+│   │   ├── fulfill-escrow.ts     # Fulfill escrow CLI
+│   │   └── collect-escrow.ts     # Collect escrow CLI
+│   ├── server/                   # Server-side components
+│   │   ├── deploy.ts             # Contract deployment script
+│   │   └── oracle.ts             # Oracle service
+│   ├── scripts/                  # Shell scripts for orchestration
+│   │   ├── dev.sh                # Development environment setup
+│   │   ├── deploy.sh             # Deployment wrapper
+│   │   ├── start-oracle.sh       # Oracle starter
+│   │   └── stop.sh               # Cleanup script
+│   └── deployments/              # Deployment addresses (generated)
+│       ├── localhost.json
+│       ├── sepolia.json
+│       └── mainnet.json
 ├── clients/
-│   └── nla.ts         # Natural Language Agreement client
+│   └── nla.ts                    # Natural Language Agreement client library
 ├── tests/
-│   ├── nla.test.ts           # Basic tests
-│   └── nlaOracle.test.ts     # Oracle arbitration tests
-├── deployments/        # Deployment addresses (generated)
-│   ├── localhost.json
-│   ├── sepolia.json
-│   └── mainnet.json
+│   ├── nla.test.ts               # Basic tests
+│   └── nlaOracle.test.ts         # Oracle arbitration tests
+├── index.ts                      # Development entry point
 ├── package.json
 └── README.md
 ```

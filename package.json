@@ -13,13 +13,13 @@
     "dev": "bun run index.ts",
     "start": "bun run index.ts",
     "test": "bun test ./tests --exclude alkahest-ts/** ",
-    "setup": "./cli/scripts/dev.sh",
-    "deploy": "./cli/scripts/deploy.sh",
-    "oracle": "./cli/scripts/start-oracle.sh",
-    "stop": "./cli/scripts/stop.sh",
-    "escrow:create": "bun run cli/client/create-escrow.ts",
-    "escrow:fulfill": "bun run cli/client/fulfill-escrow.ts",
-    "escrow:collect": "bun run cli/client/collect-escrow.ts"
+    "setup": "bun run cli/index.ts dev",
+    "deploy": "bun run cli/index.ts deploy",
+    "oracle": "bun run cli/index.ts start-oracle",
+    "stop": "bun run cli/index.ts stop",
+    "escrow:create": "bun run cli/index.ts escrow:create",
+    "escrow:fulfill": "bun run cli/index.ts escrow:fulfill",
+    "escrow:collect": "bun run cli/index.ts escrow:collect"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
