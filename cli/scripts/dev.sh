@@ -103,12 +103,12 @@ fi
 # Deploy contracts
 echo -e "\n${BLUE}📝 Deploying contracts...${NC}\n"
 export DEPLOYER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-./scripts/deploy.sh localhost http://localhost:8545
+./cli/scripts/deploy.sh localhost http://localhost:8545
 
 # Start oracle
 echo -e "\n${BLUE}🚀 Starting oracle...${NC}\n"
 export ORACLE_PRIVATE_KEY="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-./scripts/start-oracle.sh localhost
+./cli/scripts/start-oracle.sh localhost
 
 # Cleanup function
 cleanup() {

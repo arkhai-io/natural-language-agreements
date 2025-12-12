@@ -25,7 +25,7 @@ Options:
   --network <name>             Network to deploy to: mainnet, sepolia, localhost (required)
   --rpc-url <url>              Custom RPC URL (overrides network default)
   --private-key <key>          Deployer's private key (required)
-  --output <path>              Output file for deployment addresses (default: ./deployments/<network>.json)
+  --output <path>              Output file for deployment addresses (default: ./cli/deployments/<network>.json)
   --help, -h                   Display this help message
 
 Environment Variables (alternative to CLI options):
@@ -152,7 +152,7 @@ async function main() {
         console.log("📦 Loading contract artifacts...\n");
         
         // This requires alkahest to be properly set up
-        const alkahestPath = "../../alkahest/sdks/ts";
+        const alkahestPath = "../../../alkahest/sdks/ts";
         const contractsPath = `${alkahestPath}/src/contracts`;
         
         // Import necessary artifacts
@@ -329,7 +329,10 @@ async function main() {
         }
 
         // Save deployment addresses
-        const outputPath = args.output || resolve(`./deployments/${network}.json`);
+        // Get the script directory and go up to project root, then into cli/deployments
+        const scriptDir = import.meta.dir;
+        const projectRoot = resolve(scriptDir, "../..");
+        const outputPath = args.output || resolve(projectRoot, `cli/deployments/${network}.json`);
         const outputDir = resolve(outputPath, "..");
         
         if (!existsSync(outputDir)) {

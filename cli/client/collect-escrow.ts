@@ -26,7 +26,7 @@ Options:
   --escrow-uid <uid>           Escrow UID to collect (required)
   --fulfillment-uid <uid>      Fulfillment UID that was approved (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./deployments/localhost.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 
@@ -79,7 +79,7 @@ async function main() {
         const escrowUid = args["escrow-uid"];
         const fulfillmentUid = args["fulfillment-uid"];
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./deployments/localhost.json";
+        const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
 
         // Validate required parameters
         if (!escrowUid) {
@@ -117,7 +117,7 @@ async function main() {
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
 
         // Import alkahest client
-        const { makeClient } = await import("../../alkahest/sdks/ts/src/index.ts");
+        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
 
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);

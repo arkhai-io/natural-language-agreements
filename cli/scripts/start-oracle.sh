@@ -19,7 +19,7 @@ fi
 
 # Default network
 NETWORK=${1:-localhost}
-DEPLOYMENT_FILE="./deployments/${NETWORK}.json"
+DEPLOYMENT_FILE="./cli/deployments/${NETWORK}.json"
 
 echo -e "${BLUE}🚀 Starting Natural Language Agreement Oracle${NC}\n"
 
@@ -27,7 +27,7 @@ echo -e "${BLUE}🚀 Starting Natural Language Agreement Oracle${NC}\n"
 if [ ! -f "$DEPLOYMENT_FILE" ]; then
     echo -e "${RED}❌ Error: Deployment file not found: $DEPLOYMENT_FILE${NC}"
     echo "Please deploy contracts first:"
-    echo "  ./scripts/deploy.sh $NETWORK"
+    echo "  ./cli/scripts/deploy.sh $NETWORK"
     exit 1
 fi
 
@@ -54,7 +54,7 @@ echo ""
 
 # Start oracle
 echo -e "${BLUE}👂 Starting oracle (Press Ctrl+C to stop)...${NC}\n"
-bun run setups/oracle.ts \
+bun run cli/server/oracle.ts \
     --deployment "$DEPLOYMENT_FILE" \
     --openai-api-key "$OPENAI_API_KEY" \
     --private-key "$ORACLE_PRIVATE_KEY"

@@ -28,7 +28,7 @@ Options:
   --fulfillment <text>         Your fulfillment text (required)
   --oracle <address>           Oracle address that will arbitrate (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./deployments/localhost.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 
@@ -84,7 +84,7 @@ async function main() {
         const fulfillment = args.fulfillment;
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./deployments/localhost.json";
+        const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
 
         // Validate required parameters
         if (!escrowUid) {
@@ -129,7 +129,7 @@ async function main() {
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
 
         // Import alkahest client
-        const { makeClient } = await import("../../alkahest/sdks/ts/src/index.ts");
+        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
 
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);

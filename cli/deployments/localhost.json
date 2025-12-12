@@ -2,7 +2,7 @@
   "network": "localhost",
   "chainId": 31337,
   "rpcUrl": "http://localhost:8545",
-  "deployedAt": "2025-12-12T05:50:31.992Z",
+  "deployedAt": "2025-12-12T09:19:50.255Z",
   "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "addresses": {
     "easSchemaRegistry": "0x5fbdb2315678afecb367f032d93f642f64180aa3",

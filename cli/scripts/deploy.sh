@@ -42,22 +42,22 @@ echo -e "${GREEN}✅ Contract artifacts found${NC}\n"
 
 # Run deployment
 echo -e "${BLUE}📝 Deploying to ${NETWORK}...${NC}"
-bun run setups/deploy.ts --network "$NETWORK" --rpc-url "$RPC_URL"
+bun run cli/server/deploy.ts --network "$NETWORK" --rpc-url "$RPC_URL"
 
 # Check if deployment was successful
 if [ $? -eq 0 ]; then
     echo -e "\n${GREEN}✨ Deployment complete!${NC}"
-    echo -e "${BLUE}Deployment file saved to: deployments/${NETWORK}.json${NC}\n"
+    echo -e "${BLUE}Deployment file saved to: cli/deployments/${NETWORK}.json${NC}\n"
     
     echo -e "${YELLOW}Next steps:${NC}"
     echo "1. Start the oracle with:"
-    echo "   ./scripts/start-oracle.sh $NETWORK"
+    echo "   ./cli/scripts/start-oracle.sh $NETWORK"
     echo ""
     echo "2. Or using npm script:"
     echo "   bun run oracle"
     echo ""
     echo "3. Or manually:"
-    echo "   bun run setups/oracle.ts --deployment ./deployments/${NETWORK}.json"
+    echo "   bun run cli/server/oracle.ts --deployment ./cli/deployments/${NETWORK}.json"
 else
     echo -e "\n${RED}❌ Deployment failed${NC}"
     exit 1

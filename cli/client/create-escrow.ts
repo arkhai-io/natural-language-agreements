@@ -29,7 +29,7 @@ Options:
   --token <address>            ERC20 token address (required)
   --oracle <address>           Oracle address that will arbitrate (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./deployments/localhost.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 
@@ -88,7 +88,7 @@ async function main() {
         const tokenAddress = args.token;
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./deployments/localhost.json";
+        const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
 
         // Validate required parameters
         if (!demand) {
@@ -140,8 +140,8 @@ async function main() {
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
 
         // Import alkahest client
-        const { makeClient } = await import("../../alkahest/sdks/ts/src/index.ts");
-        const { makeLLMClient } = await import("../clients/nla.ts");
+        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
+        const { makeLLMClient } = await import("../../clients/nla.ts");
 
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);
@@ -180,7 +180,7 @@ async function main() {
         });
 
         // Check token balance
-        const MockERC20Permit = await import("../../alkahest/sdks/ts/tests/fixtures/MockERC20Permit.json");
+        const MockERC20Permit = await import("../../../alkahest/sdks/ts/tests/fixtures/MockERC20Permit.json");
         const tokenBalance = await walletClient.readContract({
             address: tokenAddress as `0x${string}`,
             abi: MockERC20Permit.abi,

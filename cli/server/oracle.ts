@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { parseArgs } from "util";
 import { parseAbiParameters } from "viem";
-import { makeLLMClient } from "../clients/nla";
+import { makeLLMClient } from "../../clients/nla";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -127,7 +127,7 @@ async function main() {
         }
 
         // Import alkahest client
-        const { makeClient } = await import("../../alkahest/sdks/ts/src/index.ts");
+        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
         const { createWalletClient, http, publicActions } = await import("viem");
         const { privateKeyToAccount } = await import("viem/accounts");
         const { foundry } = await import("viem/chains");

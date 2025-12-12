@@ -61,12 +61,12 @@ bun test tests/nlaOracle.test.ts
 ```bash
 # Get Sepolia ETH from faucet first
 export DEPLOYER_PRIVATE_KEY=0x...
-bun run setups/deploy.ts --network sepolia --rpc-url https://sepolia.infura.io/v3/YOUR-KEY
+bun run cli/server/deploy.ts --network sepolia --rpc-url https://sepolia.infura.io/v3/YOUR-KEY
 
 # Start oracle
 export ORACLE_PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
-bun run setups/oracle.ts sepolia
+bun run cli/server/oracle.ts sepolia
 ```
 
 ## Need Help?
