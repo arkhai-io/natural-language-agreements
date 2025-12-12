@@ -41,6 +41,18 @@ cd natural-language-agreements
 bun install
 ```
 
+4. **Install the `nla` CLI globally (optional but recommended):**
+
+```bash
+# Link the CLI to make it available globally
+bun link
+
+# Now you can use 'nla' from anywhere!
+nla help
+```
+
+> **Note:** If you don't install globally, you can still use the CLI with `bun run cli/index.ts` instead of `nla`.
+
 ## Quick Start
 
 ### Option 1: Automated Setup (Easiest - 1 command!)
@@ -98,7 +110,31 @@ Watch the oracle terminal - you'll see it process arbitration requests in real-t
 
 ## CLI Tools
 
-For a complete guide to the CLI commands, see [CLI Documentation](cli/README.md).
+The `nla` CLI provides a unified interface for all Natural Language Agreement operations.
+
+### Installation
+
+To use the `nla` command globally:
+
+```bash
+# From the natural-language-agreements directory
+bun link
+
+# Verify installation
+nla help
+```
+
+**Alternative (without global install):**
+```bash
+# Use the CLI directly
+bun run cli/index.ts help
+
+# Or use npm scripts
+bun run setup    # Same as: nla dev
+bun run deploy   # Same as: nla deploy
+```
+
+For a complete guide to all CLI commands and options, see [CLI Documentation](cli/README.md).
 
 ### Quick CLI Examples
 
