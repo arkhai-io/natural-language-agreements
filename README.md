@@ -93,12 +93,6 @@ This creates `cli/deployments/localhost.json` with all contract addresses.
 nla start-oracle
 ```
 
-#### 4. Test It
-
-```bash
-# Terminal 3 (or 4): Run tests
-bun test tests/nlaOracle.test.ts
-```
 
 Watch the oracle terminal - you'll see it process arbitration requests in real-time!
 
@@ -188,53 +182,6 @@ bun run setup                 # Same as: nla dev
 bun run deploy                # Same as: nla deploy
 bun run oracle                # Same as: nla start-oracle
 bun run stop                  # Same as: nla stop
-```
-
-## Production Deployment
-
-For production, run the oracle as a background service:
-
-### Using systemd (Linux)
-
-```bash
-# Copy service file
-sudo cp deployment/nla-oracle.service /etc/systemd/system/
-
-# Edit the service file with your paths and config
-sudo nano /etc/systemd/system/nla-oracle.service
-
-# Enable and start
-sudo systemctl enable nla-oracle
-sudo systemctl start nla-oracle
-
-# View logs
-sudo journalctl -u nla-oracle -f
-```
-
-### Using nohup (Simple)
-
-```bash
-# Start in background
-nohup nla start-oracle mainnet > oracle.log 2>&1 &
-
-# Save PID
-echo $! > oracle.pid
-
-# Stop later
-kill $(cat oracle.pid)
-```
-
-### Using screen (Simple)
-
-```bash
-# Start screen session
-screen -S oracle
-
-# Run oracle
-nla start-oracle mainnet
-
-# Detach: Ctrl+A, then D
-# Reattach: screen -r oracle
 ```
 
 ## Monitoring
