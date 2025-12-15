@@ -12,6 +12,9 @@ import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
+import { makeClient } from "alkahest-ts";
+import { makeLLMClient } from "../../clients/nla.ts";
+import {fixtures} from "alkahest-ts";
 
 // Helper function to display usage
 function displayHelp() {
@@ -139,10 +142,6 @@ async function main() {
         console.log(`  ⚖️  Oracle: ${oracleAddress}`);
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
 
-        // Import alkahest client
-        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
-        const { makeLLMClient } = await import("../../clients/nla.ts");
-
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);
         const walletClient = createWalletClient({
@@ -180,10 +179,9 @@ async function main() {
         });
 
         // Check token balance
-        const MockERC20Permit = await import("../../../alkahest/sdks/ts/tests/fixtures/MockERC20Permit.json");
         const tokenBalance = await walletClient.readContract({
             address: tokenAddress as `0x${string}`,
-            abi: MockERC20Permit.abi,
+            abi: fixtures.MockERC20Permit.abi,
             functionName: "balanceOf",
             args: [account.address],
         }) as bigint;

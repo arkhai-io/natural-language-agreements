@@ -12,6 +12,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { mainnet, sepolia, foundry } from "viem/chains";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
+import { fixtures, contracts } from "alkahest-ts";
 
 // Helper function to display usage
 function displayHelp() {
@@ -151,19 +152,14 @@ async function main() {
         // Import contract artifacts from alkahest
         console.log("📦 Loading contract artifacts...\n");
         
-        // This requires alkahest to be properly set up
-        const alkahestPath = "../../../alkahest/sdks/ts";
-        const contractsPath = `${alkahestPath}/src/contracts`;
-        
-        // Import necessary artifacts
-        const EAS = await import(`${alkahestPath}/tests/fixtures/EAS.json`);
-        const SchemaRegistry = await import(`${alkahestPath}/tests/fixtures/SchemaRegistry.json`);
-        const MockERC20Permit = await import(`${alkahestPath}/tests/fixtures/MockERC20Permit.json`);
-        const TrustedOracleArbiter = await import(`${contractsPath}/TrustedOracleArbiter.json`);
-        const StringObligation = await import(`${contractsPath}/StringObligation.json`);
-        const ERC20EscrowObligation = await import(`${contractsPath}/ERC20EscrowObligation.json`);
-        const ERC20PaymentObligation = await import(`${contractsPath}/ERC20PaymentObligation.json`);
-        const ERC20BarterCrossToken = await import(`${contractsPath}/ERC20BarterCrossToken.json`);
+        const EAS = fixtures.EAS;
+        const SchemaRegistry = fixtures.SchemaRegistry;
+        const MockERC20Permit = fixtures.MockERC20Permit;
+        const TrustedOracleArbiter = contracts.TrustedOracleArbiter;
+        const StringObligation = contracts.StringObligation;
+        const ERC20EscrowObligation = contracts.ERC20EscrowObligation;
+        const ERC20PaymentObligation = contracts.ERC20PaymentObligation;
+        const ERC20BarterCrossToken = contracts.ERC20BarterCrossToken;
 
         console.log("✅ Contract artifacts loaded\n");
 

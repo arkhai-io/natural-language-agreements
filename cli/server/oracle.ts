@@ -1,9 +1,13 @@
 #!/usr/bin/env bun
 import { parseArgs } from "util";
-import { parseAbiParameters } from "viem";
+import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { foundry } from "viem/chains";
 import { makeLLMClient } from "../../clients/nla";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
+import { makeClient } from "alkahest-ts";
+import { fixtures } from "alkahest-ts";
 
 // Helper function to display usage
 function displayHelp() {
@@ -125,12 +129,6 @@ async function main() {
             console.error("Run with --help for usage information.");
             process.exit(1);
         }
-
-        // Import alkahest client
-        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
-        const { createWalletClient, http, publicActions } = await import("viem");
-        const { privateKeyToAccount } = await import("viem/accounts");
-        const { foundry } = await import("viem/chains");
 
         console.log("🚀 Starting Natural Language Agreement Oracle...\n");
         console.log("Configuration:");

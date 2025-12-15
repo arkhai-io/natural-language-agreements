@@ -12,6 +12,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
+import { makeClient } from "alkahest-ts";
 
 // Helper function to display usage
 function displayHelp() {
@@ -127,9 +128,6 @@ async function main() {
         console.log(`  📝 Fulfillment: "${fulfillment}"`);
         console.log(`  ⚖️  Oracle: ${oracleAddress}`);
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
-
-        // Import alkahest client
-        const { makeClient } = await import("../../../alkahest/sdks/ts/src/index.ts");
 
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);
