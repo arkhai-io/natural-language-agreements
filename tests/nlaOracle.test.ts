@@ -6,17 +6,16 @@ import { openai } from "@ai-sdk/openai"
 
 import {
     setupTestEnvironment,
-    teardownTestEnvironment,
     type TestContext,
-} from "alkahest-ts/tests/utils/setup";
+} from "alkahest-ts";
 import { makeLLMClient } from "../clients/nla";
 
 let testContext: TestContext;
-let charlieClient: ReturnType<typeof testContext.charlieClient.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
+let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
 
 beforeAll(async () => {
     testContext = await setupTestEnvironment();
-    charlieClient = testContext.charlieClient.extend((client) => ({
+    charlieClient = testContext.charlie.client.extend((client) => ({
         llm: makeLLMClient([]),
     }));
     charlieClient.llm.addProvider({
@@ -35,15 +34,14 @@ beforeEach(async () => {
 
 afterAll(async () => {
     // Clean up
-    await teardownTestEnvironment(testContext);
 });
 
 
 test("listenAndArbitrate Natural Language", async () => {
 
     const arbiter = testContext.addresses.trustedOracleArbiter;
-    const demand = testContext.aliceClient.arbiters.general.trustedOracle.encode({
-        oracle: testContext.bob,
+    const demand = testContext.alice.client.arbiters.general.trustedOracle.encode({
+        oracle: testContext.bob.address,
         data: charlieClient.llm.encodeDemand({
             arbitrationProvider: "OpenAI",
             arbitrationModel: "gpt-4.1",
@@ -57,7 +55,7 @@ Fulfillment: {{obligation}}`,
     });
 
     const { attested: escrow } =
-        await testContext.aliceClient.erc20.permitAndBuyWithErc20(
+        await testContext.alice.client.erc20.permitAndBuyWithErc20(
             {
                 address: testContext.mockAddresses.erc20A,
                 value: 10n,
@@ -68,14 +66,14 @@ Fulfillment: {{obligation}}`,
 
     const obligationAbi = parseAbiParameters("(string item)");
     const { decisions, unwatch } =
-        await testContext.bobClient.oracle.listenAndArbitrate(
+        await testContext.bob.client.oracle.listenAndArbitrate(
             async (attestation) => {
                 console.log("arbitrating");
-                const obligation = testContext.bobClient.extractObligationData(
+                const obligation = testContext.bob.client.extractObligationData(
                     obligationAbi,
                     attestation,
                 );
-                const [, demand] = await testContext.bobClient.getEscrowAndDemand(
+                const [, demand] = await testContext.bob.client.getEscrowAndDemand(
                     charlieClient.llm.LLMAbi,
                     attestation,
                 );
@@ -86,7 +84,7 @@ Fulfillment: {{obligation}}`,
             },
             {
                 onAfterArbitrate: async (decision) => {
-                    const obligation = testContext.bobClient.extractObligationData(
+                    const obligation = testContext.bob.client.extractObligationData(
                         obligationAbi,
                         decision.attestation,
                     );
@@ -99,20 +97,20 @@ Fulfillment: {{obligation}}`,
         );
 
     const { attested: fulfillment } =
-        await testContext.bobClient.stringObligation.doObligation(
+        await testContext.bob.client.stringObligation.doObligation(
             "The sky appears blue today",
             escrow.uid,
         );
 
-    await testContext.bobClient.oracle.requestArbitration(
+    await testContext.bob.client.oracle.requestArbitration(
         fulfillment.uid,
-        testContext.bob,
+        testContext.bob.address,
     );
 
     //Should call WaitForArbitration()
     await Bun.sleep(2000);
 
-    const collectionHash = await testContext.bobClient.erc20.collectEscrow(
+    const collectionHash = await testContext.bob.client.erc20.collectEscrow(
         escrow.uid,
         fulfillment.uid,
     );

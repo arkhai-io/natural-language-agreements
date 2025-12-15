@@ -1,12 +1,10 @@
 import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";
 import { makeLLMClient } from "../clients/nla";
 import type { LLMProvider, LLMDemand } from "../clients/nla";
-
 import {
     setupTestEnvironment,
-    teardownTestEnvironment,
     type TestContext,
-} from "alkahest-ts/tests/utils/setup";
+} from "alkahest-ts";
 
 let testContext: TestContext;
 
@@ -23,7 +21,6 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-    await teardownTestEnvironment(testContext);
 });
 
 test("LLM client basic functionality", async () => {

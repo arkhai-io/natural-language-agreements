@@ -1,6 +1,11 @@
 #!/usr/bin/env bun
 import { parseArgs } from "util";
+import { spawnSync } from "child_process";
+import { existsSync, readFileSync } from "fs";
 
+import { createPublicClient, http, parseAbiParameters, decodeAbiParameters } from "viem";
+import { foundry } from "viem/chains";
+import { contracts } from "alkahest-ts";
 // Helper function to display usage
 function displayHelp() {
     console.log(`
@@ -245,8 +250,6 @@ async function runStatusCommand(args: any) {
         transport: http(rpcUrl),
     });
 
-    // Load EAS ABI
-    const { default: EAS } = await import("../../alkahest/contracts/out/EAS.sol/EAS.json");
 
     if (!addresses.eas) {
         console.error("❌ Error: EAS address not found. Use --deployment to specify deployment file.");
@@ -258,7 +261,7 @@ async function runStatusCommand(args: any) {
     
     const escrow = await publicClient.readContract({
         address: addresses.eas,
-        abi: EAS.abi,
+        abi: contracts.IEAS.abi,
         functionName: "getAttestation",
         args: [escrowUid],
     }) as any;
@@ -289,7 +292,7 @@ async function runStatusCommand(args: any) {
     
     const filter = await publicClient.createContractEventFilter({
         address: addresses.eas,
-        abi: EAS.abi,
+        abi: contracts.IEAS.abi,
         eventName: "Attested",
         fromBlock: 0n,
     });
@@ -310,7 +313,7 @@ async function runStatusCommand(args: any) {
             const fulfillmentUid = (fulfillment as any).args?.uid;
             const fulfillmentAttestation = await publicClient.readContract({
                 address: addresses.eas,
-                abi: EAS.abi,
+                abi: contracts.IEAS.abi,
                 functionName: "getAttestation",
                 args: [fulfillmentUid],
             }) as any;
@@ -327,7 +330,7 @@ async function runStatusCommand(args: any) {
                     const decisionUid = (decision as any).args?.uid;
                     const decisionAttestation = await publicClient.readContract({
                         address: addresses.eas,
-                        abi: EAS.abi,
+                        abi: contracts.IEAS.abi,
                         functionName: "getAttestation",
                         args: [decisionUid],
                     }) as any;
