@@ -3,7 +3,7 @@ import { parseArgs } from "util";
 import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
-import { makeLLMClient } from "../../clients/nla";
+import { makeLLMClient } from "../..";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
@@ -20,7 +20,9 @@ Usage:
 Options:
   --rpc-url <url>              RPC URL for the blockchain network (required)
   --private-key <key>          Private key of the oracle operator (required)
-  --openai-api-key <key>       OpenAI API key (required)
+  --openai-api-key <key>       OpenAI API key (optional)
+  --anthropic-api-key <key>    Anthropic API key (optional)
+  --openrouter-api-key <key>   OpenRouter API key (optional)
   --eas-contract <address>     EAS contract address (optional)
   --deployment <file>          Load addresses from deployment file (optional)
   --polling-interval <ms>      Polling interval in milliseconds (default: 5000)
@@ -30,6 +32,8 @@ Environment Variables (alternative to CLI options):
   RPC_URL                      RPC URL for the blockchain network
   ORACLE_PRIVATE_KEY           Private key of the oracle operator
   OPENAI_API_KEY               OpenAI API key
+  ANTHROPIC_API_KEY            Anthropic API key
+  OPENROUTER_API_KEY           OpenRouter API key
   EAS_CONTRACT_ADDRESS         EAS contract address
 
 Examples:
@@ -55,6 +59,8 @@ function parseCliArgs() {
             "rpc-url": { type: "string" },
             "private-key": { type: "string" },
             "openai-api-key": { type: "string" },
+            "anthropic-api-key": { type: "string" },
+            "openrouter-api-key": { type: "string" },
             "eas-contract": { type: "string" },
             "deployment": { type: "string" },
             "polling-interval": { type: "string" },
@@ -109,6 +115,8 @@ async function main() {
 
         const privateKey = args["private-key"] || process.env.ORACLE_PRIVATE_KEY;
         const openaiApiKey = args["openai-api-key"] || process.env.OPENAI_API_KEY;
+        const anthropicApiKey = args["anthropic-api-key"] || process.env.ANTHROPIC_API_KEY;
+        const openrouterApiKey = args["openrouter-api-key"] || process.env.OPENROUTER_API_KEY;
         const pollingInterval = parseInt(args["polling-interval"] || "5000");
 
         // Validate required parameters
@@ -124,8 +132,10 @@ async function main() {
             process.exit(1);
         }
 
-        if (!openaiApiKey) {
-            console.error("❌ Error: OpenAI API key is required. Use --openai-api-key or set OPENAI_API_KEY environment variable.");
+        // Check if at least one API key is provided
+        if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey) {
+            console.error("❌ Error: At least one LLM provider API key is required.");
+            console.error("   Set one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY");
             console.error("Run with --help for usage information.");
             process.exit(1);
         }
@@ -134,7 +144,14 @@ async function main() {
         console.log("Configuration:");
         console.log(`  📡 RPC URL: ${rpcUrl}`);
         console.log(`  🔑 Oracle Key: ${privateKey.slice(0, 6)}...${privateKey.slice(-4)}`);
-        console.log(`  🤖 AI Provider: OpenAI`);
+        
+        // Show available providers
+        const availableProviders = [];
+        if (openaiApiKey) availableProviders.push("OpenAI");
+        if (anthropicApiKey) availableProviders.push("Anthropic");
+        if (openrouterApiKey) availableProviders.push("OpenRouter");
+        console.log(`  🤖 AI Providers: ${availableProviders.join(", ")}`);
+        
         if (easContract) {
             console.log(`  📝 EAS Contract: ${easContract}`);
         }
@@ -158,19 +175,39 @@ async function main() {
             llm: makeLLMClient([]),
         }));
 
-        llmClient.llm.addProvider({
-            providerName: "OpenAI",
-            apiKey: openaiApiKey,
-        });
+        // Add all available providers
+        if (openaiApiKey) {
+            llmClient.llm.addProvider({
+                providerName: "OpenAI",
+                apiKey: openaiApiKey,
+            });
+            console.log("✅ OpenAI provider configured");
+        }
 
-        console.log("🎯 LLM Arbitrator configured and ready\n");
+        if (anthropicApiKey) {
+            llmClient.llm.addProvider({
+                providerName: "Anthropic",
+                apiKey: anthropicApiKey,
+            });
+            console.log("✅ Anthropic provider configured");
+        }
+
+        if (openrouterApiKey) {
+            llmClient.llm.addProvider({
+                providerName: "OpenRouter",
+                apiKey: openrouterApiKey,
+            });
+            console.log("✅ OpenRouter provider configured");
+        }
+
+        console.log("\n🎯 LLM Arbitrator configured and ready\n");
         console.log("👂 Listening for arbitration requests...\n");
 
         // Define the obligation ABI
         const obligationAbi = parseAbiParameters("(string item)");
 
         // Start listening and arbitrating
-        const { unwatch } = await client.oracle.listenAndArbitrate(
+        const { unwatch } = await client.arbiters.general.trustedOracle.listenAndArbitrate(
             async (attestation: any) => {
                 console.log(`\n📨 New arbitration request received!`);
                 console.log(`   Attestation UID: ${attestation.uid}`);

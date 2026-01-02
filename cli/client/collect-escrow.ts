@@ -145,7 +145,7 @@ async function main() {
         console.log("💰 Collecting escrow...\n");
 
         // Collect the escrow
-        const collectionHash = await client.erc20.collectEscrow(
+        const collectionHash = await client.erc20.escrow.nonTierable.collect(
             escrowUid as `0x${string}`,
             fulfillmentUid as `0x${string}`,
         );

@@ -13,7 +13,7 @@ import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
-import { makeLLMClient } from "../../clients/nla.ts";
+import { makeLLMClient } from "../..";
 import {fixtures} from "alkahest-ts";
 
 // Helper function to display usage
@@ -34,6 +34,9 @@ Options:
   --private-key <key>          Your private key (required)
   --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
+  --arbitration-provider <name> Arbitration provider (default: OpenAI)
+  --arbitration-model <model>  Arbitration model (default: gpt-4o-mini)
+  --arbitration-prompt <text>  Custom arbitration prompt (optional)
   --help, -h                   Display this help message
 
 Environment Variables (alternative to CLI options):
@@ -67,6 +70,9 @@ function parseCliArgs() {
             "private-key": { type: "string" },
             "deployment": { type: "string" },
             "rpc-url": { type: "string" },
+            "arbitration-provider": { type: "string" },
+            "arbitration-model": { type: "string" },
+            "arbitration-prompt": { type: "string" },
             "help": { type: "boolean", short: "h" },
         },
         strict: true,
@@ -92,6 +98,16 @@ async function main() {
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
         const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
+        
+        // Arbitration configuration with defaults
+        const arbitrationProvider = args["arbitration-provider"] || "OpenAI";
+        const arbitrationModel = args["arbitration-model"] || "gpt-4o-mini";
+        const arbitrationPrompt = args["arbitration-prompt"] || 
+            `Evaluate the fulfillment against the demand and decide whether the demand was validly fulfilled
+
+Demand: {{demand}}
+
+Fulfillment: {{obligation}}`;
 
         // Validate required parameters
         if (!demand) {
@@ -167,16 +183,10 @@ async function main() {
             deployment.addresses
         );
 
-        // Extend with LLM client
+        // Extend with LLM client (only for encoding the demand, no API calls needed)
         const llmClient = client.extend((c) => ({
             llm: makeLLMClient([]),
         }));
-
-        // Add OpenAI provider (needed for encoding demands)
-        llmClient.llm.addProvider({
-            providerName: "OpenAI",
-            apiKey: process.env.OPENAI_API_KEY || "",
-        });
 
         // Check token balance
         const tokenBalance = await walletClient.readContract({
@@ -197,22 +207,18 @@ async function main() {
 
         // Encode the demand with oracle arbiter
         const arbiter = deployment.addresses.trustedOracleArbiter;
-        const encodedDemand = client.arbiters.general.trustedOracle.encode({
+        const encodedDemand = client.arbiters.general.trustedOracle.encodeDemand({
             oracle: oracleAddress as `0x${string}`,
             data: llmClient.llm.encodeDemand({
-                arbitrationProvider: "OpenAI",
-                arbitrationModel: "gpt-4.1",
-                arbitrationPrompt: `Evaluate the fulfillment against the demand and decide whether the demand was validly fulfilled
-
-Demand: {{demand}}
-
-Fulfillment: {{obligation}}`,
+                arbitrationProvider,
+                arbitrationModel,
+                arbitrationPrompt,
                 demand: demand
             })
         });
 
         // Create the escrow
-        const { attested: escrow } = await client.erc20.permitAndBuyWithErc20(
+        const { attested: escrow } = await client.erc20.escrow.nonTierable.permitAndCreate(
             {
                 address: tokenAddress as `0x${string}`,
                 value: BigInt(amount),
@@ -228,10 +234,16 @@ Fulfillment: {{obligation}}`,
         console.log(`   Recipient: ${escrow.recipient}`);
 
         console.log("🎯 Next Steps:");
-        console.log("1. Wait for someone to fulfill the obligation");
-        console.log("2. The oracle will arbitrate the fulfillment");
-        console.log("3. If approved, you can collect the escrow");
-        console.log(`\n   Escrow UID: ${escrow.uid}`);
+        console.log("1. Someone fulfills the obligation:");
+        console.log(`   nla escrow:fulfill \\`);
+        console.log(`     --escrow-uid ${escrow.uid} \\`);
+        console.log(`     --fulfillment "Yes, the sky is blue" \\`);
+        console.log(`     --oracle ${oracleAddress}`);
+        console.log("\n2. The oracle will arbitrate the fulfillment automatically");
+        console.log("\n3. If approved, collect the escrow:");
+        console.log(`   nla escrow:collect \\`);
+        console.log(`     --escrow-uid ${escrow.uid} \\`);
+        console.log(`     --fulfillment-uid <fulfillment-uid>`);
 
     } catch (error) {
         console.error("❌ Failed to create escrow:", error);

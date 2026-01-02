@@ -8,7 +8,7 @@ import {
     setupTestEnvironment,
     type TestContext,
 } from "alkahest-ts";
-import { makeLLMClient } from "../clients/nla";
+import { makeLLMClient } from "..";
 
 let testContext: TestContext;
 let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
@@ -40,7 +40,7 @@ afterAll(async () => {
 test("listenAndArbitrate Natural Language", async () => {
 
     const arbiter = testContext.addresses.trustedOracleArbiter;
-    const demand = testContext.alice.client.arbiters.general.trustedOracle.encode({
+    const demand = testContext.alice.client.arbiters.general.trustedOracle.encodeDemand({
         oracle: testContext.bob.address,
         data: charlieClient.llm.encodeDemand({
             arbitrationProvider: "OpenAI",
@@ -55,7 +55,7 @@ Fulfillment: {{obligation}}`,
     });
 
     const { attested: escrow } =
-        await testContext.alice.client.erc20.permitAndBuyWithErc20(
+        await testContext.alice.client.erc20.escrow.nonTierable.permitAndCreate(
             {
                 address: testContext.mockAddresses.erc20A,
                 value: 10n,
@@ -66,7 +66,7 @@ Fulfillment: {{obligation}}`,
 
     const obligationAbi = parseAbiParameters("(string item)");
     const { decisions, unwatch } =
-        await testContext.bob.client.oracle.listenAndArbitrate(
+        await testContext.bob.client.arbiters.general.trustedOracle.listenAndArbitrate(
             async (attestation) => {
                 console.log("arbitrating");
                 const obligation = testContext.bob.client.extractObligationData(
@@ -102,15 +102,16 @@ Fulfillment: {{obligation}}`,
             escrow.uid,
         );
 
-    await testContext.bob.client.oracle.requestArbitration(
+    await testContext.bob.client.arbiters.general.trustedOracle.requestArbitration(
         fulfillment.uid,
         testContext.bob.address,
+        demand
     );
 
     //Should call WaitForArbitration()
-    await Bun.sleep(2000);
+    await Bun.sleep(5000);
 
-    const collectionHash = await testContext.bob.client.erc20.collectEscrow(
+    const collectionHash = await testContext.bob.client.erc20.escrow.nonTierable.collect(
         escrow.uid,
         fulfillment.uid,
     );

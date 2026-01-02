@@ -25,10 +25,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.50",
+    "@ai-sdk/anthropic": "^3.0.2",
+    "@ai-sdk/openai": "^3.0.2",
     "@viem/anvil": "^0.0.10",
-    "ai": "^5.0.68",
-    "alkahest-ts": "git+https://github.com/VAR-META-Tech/alkahest.git#ts-package",
+    "ai": "^6.0.5",
+    "alkahest-ts": "github:arkhai-io/alkahest",
     "arktype": "^2.1.23",
     "viem": "^2.42.1",
     "zod": "^3.25.76"
