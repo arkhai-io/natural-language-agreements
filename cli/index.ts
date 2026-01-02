@@ -36,6 +36,9 @@ Options (vary by command):
   --private-key <key>          Private key (all commands)
   --rpc-url <url>              RPC URL (default: http://localhost:8545)
   --deployment <file>          Load addresses from deployment file
+  --arbitration-provider <name> Arbitration provider (create, default: OpenAI)
+  --arbitration-model <model>  Arbitration model (create, default: gpt-4o-mini)
+  --arbitration-prompt <text>  Custom arbitration prompt (create, optional)
 
 Environment Variables:
   PRIVATE_KEY                  Private key for transactions
@@ -107,6 +110,9 @@ function parseCliArgs() {
             "private-key": { type: "string" },
             "rpc-url": { type: "string" },
             "deployment": { type: "string" },
+            "arbitration-provider": { type: "string" },
+            "arbitration-model": { type: "string" },
+            "arbitration-prompt": { type: "string" },
         },
         strict: true,
     });

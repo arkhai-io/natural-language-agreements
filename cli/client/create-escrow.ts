@@ -34,6 +34,9 @@ Options:
   --private-key <key>          Your private key (required)
   --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
+  --arbitration-provider <name> Arbitration provider (default: OpenAI)
+  --arbitration-model <model>  Arbitration model (default: gpt-4o-mini)
+  --arbitration-prompt <text>  Custom arbitration prompt (optional)
   --help, -h                   Display this help message
 
 Environment Variables (alternative to CLI options):
@@ -67,6 +70,9 @@ function parseCliArgs() {
             "private-key": { type: "string" },
             "deployment": { type: "string" },
             "rpc-url": { type: "string" },
+            "arbitration-provider": { type: "string" },
+            "arbitration-model": { type: "string" },
+            "arbitration-prompt": { type: "string" },
             "help": { type: "boolean", short: "h" },
         },
         strict: true,
@@ -92,6 +98,16 @@ async function main() {
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
         const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
+        
+        // Arbitration configuration with defaults
+        const arbitrationProvider = args["arbitration-provider"] || "OpenAI";
+        const arbitrationModel = args["arbitration-model"] || "gpt-4o-mini";
+        const arbitrationPrompt = args["arbitration-prompt"] || 
+            `Evaluate the fulfillment against the demand and decide whether the demand was validly fulfilled
+
+Demand: {{demand}}
+
+Fulfillment: {{obligation}}`;
 
         // Validate required parameters
         if (!demand) {
@@ -194,13 +210,9 @@ async function main() {
         const encodedDemand = client.arbiters.general.trustedOracle.encode({
             oracle: oracleAddress as `0x${string}`,
             data: llmClient.llm.encodeDemand({
-                arbitrationProvider: "OpenAI",
-                arbitrationModel: "gpt-4.1",
-                arbitrationPrompt: `Evaluate the fulfillment against the demand and decide whether the demand was validly fulfilled
-
-Demand: {{demand}}
-
-Fulfillment: {{obligation}}`,
+                arbitrationProvider,
+                arbitrationModel,
+                arbitrationPrompt,
                 demand: demand
             })
         });

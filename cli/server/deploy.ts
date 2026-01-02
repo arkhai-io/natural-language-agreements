@@ -371,7 +371,9 @@ async function main() {
         console.log(`     --demand "The sky is blue" \\`);
         console.log(`     --amount 10 \\`);
         console.log(`     --token ${addresses.mockERC20A} \\`);
-        console.log(`     --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8`);
+        console.log(`     --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \\`);
+        console.log(`     --arbitration-provider "OpenAI" \\`);
+        console.log(`     --arbitration-model "gpt-4o-mini"`);
 
     } catch (error) {
         console.error("❌ Deployment failed:", error);
