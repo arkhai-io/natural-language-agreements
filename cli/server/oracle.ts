@@ -218,21 +218,23 @@ async function main() {
                         obligationAbi,
                         attestation,
                     );
-                    console.log(`   Obligation: "${obligation[0].item}"`);
+                    const obligationItem = obligation[0].item;
+                    console.log(`   Obligation: "${obligationItem}"`);
 
                     // Get demand data
                     const [, demand] = await client.getEscrowAndDemand(
                         llmClient.llm.LLMAbi,
                         attestation,
                     );
-                    console.log(`   Demand: "${demand[0].demand}"`);
-                    console.log(`   Model: ${demand[0].arbitrationModel}`);
+                    const demandData = demand[0];
+                    console.log(`   Demand: "${demandData.demand}"`);
+                    console.log(`   Model: ${demandData.arbitrationModel}`);
 
                     // Perform arbitration using LLM
                     console.log(`   🤔 Arbitrating with AI...`);
                     const result = await llmClient.llm.arbitrate(
-                        demand[0],
-                        obligation[0].item
+                        demandData,
+                        obligationItem
                     );
 
                     console.log(`   ✨ Arbitration result: ${result ? "✅ APPROVED" : "❌ REJECTED"}`);
