@@ -29,7 +29,7 @@
     "@ai-sdk/openai": "^3.0.2",
     "@viem/anvil": "^0.0.10",
     "ai": "^6.0.5",
-    "alkahest-ts": "git+https://github.com/VAR-META-Tech/alkahest.git#ts-package",
+    "alkahest-ts": "github:arkhai-io/alkahest",
     "arktype": "^2.1.23",
     "viem": "^2.42.1",
     "zod": "^3.25.76"

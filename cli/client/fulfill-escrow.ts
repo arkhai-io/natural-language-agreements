@@ -13,6 +13,7 @@ import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
+import { makeLLMClient } from "../..";
 
 // Helper function to display usage
 function displayHelp() {
@@ -161,18 +162,19 @@ async function main() {
             fulfillment,
             escrowUid as `0x${string}`,
         );
-
         console.log("✅ Fulfillment created!\n");
         console.log("📋 Fulfillment Details:");
         console.log(`   UID: ${fulfillmentAttestation.uid}`);
         console.log(`   Attester: ${fulfillmentAttestation.attester}\n`);
 
         console.log("📤 Requesting arbitration from oracle...\n");
-
+        const escrow = await client.getAttestation(escrowUid as `0x${string}`);
+        const decodedEscrow = client.erc20.escrow.nonTierable.decodeObligation(escrow.data);
         // Request arbitration
-        await client.oracle.requestArbitration(
+        await client.arbiters.general.trustedOracle.requestArbitration(
             fulfillmentAttestation.uid,
             oracleAddress as `0x${string}`,
+            decodedEscrow.demand
         );
 
         console.log("✨ Arbitration requested successfully!\n");

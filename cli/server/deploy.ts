@@ -159,7 +159,7 @@ async function main() {
         const StringObligation = contracts.StringObligation;
         const ERC20EscrowObligation = contracts.ERC20EscrowObligation;
         const ERC20PaymentObligation = contracts.ERC20PaymentObligation;
-        const ERC20BarterCrossToken = contracts.ERC20BarterCrossToken;
+        const ERC20BarterUtils = contracts.ERC20BarterUtils;
 
         console.log("✅ Contract artifacts loaded\n");
 
@@ -213,8 +213,8 @@ async function main() {
 
         addresses.trustedOracleArbiter = await deployContract(
             "Trusted Oracle Arbiter",
-            TrustedOracleArbiter.abi,
-            TrustedOracleArbiter.bytecode.object,
+            TrustedOracleArbiter.abi.abi,
+            TrustedOracleArbiter.abi.bytecode.object,
             [addresses.eas]
         );
 
@@ -223,32 +223,31 @@ async function main() {
 
         addresses.stringObligation = await deployContract(
             "String Obligation",
-            StringObligation.abi,
-            StringObligation.bytecode.object,
+            StringObligation.abi.abi,
+            StringObligation.abi.bytecode.object,
             [addresses.eas, addresses.easSchemaRegistry]
         );
 
         addresses.erc20EscrowObligation = await deployContract(
             "ERC20 Escrow Obligation",
-            ERC20EscrowObligation.abi,
-            ERC20EscrowObligation.bytecode.object,
+            ERC20EscrowObligation.abi.abi,
+            ERC20EscrowObligation.abi.bytecode.object,
             [addresses.eas, addresses.easSchemaRegistry]
         );
 
         addresses.erc20PaymentObligation = await deployContract(
             "ERC20 Payment Obligation",
-            ERC20PaymentObligation.abi,
-            ERC20PaymentObligation.bytecode.object,
+            ERC20PaymentObligation.abi.abi,
+            ERC20PaymentObligation.abi.bytecode.object,
             [addresses.eas, addresses.easSchemaRegistry]
         );
 
-        // Deploy barter utils (required for permitAndBuyWithErc20)
         console.log("🔄 Deploying barter utils...\n");
 
         addresses.erc20BarterUtils = await deployContract(
             "ERC20 Barter Utils",
-            ERC20BarterCrossToken.abi,
-            ERC20BarterCrossToken.bytecode.object,
+            ERC20BarterUtils.abi.abi,
+            ERC20BarterUtils.abi.bytecode.object,
             [
                 addresses.eas,
                 addresses.erc20EscrowObligation,
@@ -259,6 +258,8 @@ async function main() {
                 "0x0000000000000000000000000000000000000000", // erc1155Payment (not used)
                 "0x0000000000000000000000000000000000000000", // tokenBundleEscrow (not used)
                 "0x0000000000000000000000000000000000000000", // tokenBundlePayment (not used)
+                "0x0000000000000000000000000000000000000000", // nativeEscrow (not used)
+                "0x0000000000000000000000000000000000000000", // nativePayment (not used)
             ]
         );
 

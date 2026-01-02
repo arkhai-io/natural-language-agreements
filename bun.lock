@@ -9,8 +9,8 @@
         "@ai-sdk/openai": "^3.0.2",
         "@viem/anvil": "^0.0.10",
         "ai": "^6.0.5",
-        "alkahest-ts": "git+https://github.com/VAR-META-Tech/alkahest.git#ts-package",
         "arktype": "^2.1.23",
+        "alkahest-ts": "github:arkhai-io/alkahest",
         "viem": "^2.42.1",
         "zod": "^3.25.76",
       },
@@ -67,7 +67,7 @@
 
     "ai": ["ai@6.0.5", "", { "dependencies": { "@ai-sdk/gateway": "3.0.4", "@ai-sdk/provider": "3.0.1", "@ai-sdk/provider-utils": "4.0.2", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-CKL3dDHedWskC6EY67LrULonZBU9vL+Bwa+xQEcprBhJfxpogntG3utjiAkYuy5ZQatyWk+SmWG8HLvcnhvbRg=="],
 
-    "alkahest-ts": ["alkahest-ts@github:VAR-META-Tech/alkahest#d40de37", {}, "VAR-META-Tech-alkahest-d40de37"],
+    "alkahest-ts": ["alkahest-ts@github:arkhai-io/alkahest#5df4180", {}, "arkhai-io-alkahest-5df4180"],
 
     "arkregex": ["arkregex@0.0.5", "", { "dependencies": { "@ark/util": "0.56.0" } }, "sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw=="],
 

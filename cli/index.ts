@@ -267,7 +267,7 @@ async function runStatusCommand(args: any) {
     
     const escrow = await publicClient.readContract({
         address: addresses.eas,
-        abi: contracts.IEAS.abi,
+        abi: contracts.IEAS.abi.abi,
         functionName: "getAttestation",
         args: [escrowUid],
     }) as any;
@@ -298,7 +298,7 @@ async function runStatusCommand(args: any) {
     
     const filter = await publicClient.createContractEventFilter({
         address: addresses.eas,
-        abi: contracts.IEAS.abi,
+        abi: contracts.IEAS.abi.abi,
         eventName: "Attested",
         fromBlock: 0n,
     });
@@ -319,7 +319,7 @@ async function runStatusCommand(args: any) {
             const fulfillmentUid = (fulfillment as any).args?.uid;
             const fulfillmentAttestation = await publicClient.readContract({
                 address: addresses.eas,
-                abi: contracts.IEAS.abi,
+                abi: contracts.IEAS.abi.abi,
                 functionName: "getAttestation",
                 args: [fulfillmentUid],
             }) as any;
@@ -336,7 +336,7 @@ async function runStatusCommand(args: any) {
                     const decisionUid = (decision as any).args?.uid;
                     const decisionAttestation = await publicClient.readContract({
                         address: addresses.eas,
-                        abi: contracts.IEAS.abi,
+                        abi: contracts.IEAS.abi.abi,
                         functionName: "getAttestation",
                         args: [decisionUid],
                     }) as any;

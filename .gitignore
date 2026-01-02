@@ -39,3 +39,6 @@ anvil.log
 .DS_Store
 
 .env
+
+# Local deployment files
+cli/deployments/localhost.json

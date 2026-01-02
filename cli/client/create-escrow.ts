@@ -207,7 +207,7 @@ Fulfillment: {{obligation}}`;
 
         // Encode the demand with oracle arbiter
         const arbiter = deployment.addresses.trustedOracleArbiter;
-        const encodedDemand = client.arbiters.general.trustedOracle.encode({
+        const encodedDemand = client.arbiters.general.trustedOracle.encodeDemand({
             oracle: oracleAddress as `0x${string}`,
             data: llmClient.llm.encodeDemand({
                 arbitrationProvider,
@@ -218,7 +218,7 @@ Fulfillment: {{obligation}}`;
         });
 
         // Create the escrow
-        const { attested: escrow } = await client.erc20.permitAndBuyWithErc20(
+        const { attested: escrow } = await client.erc20.escrow.nonTierable.permitAndCreate(
             {
                 address: tokenAddress as `0x${string}`,
                 value: BigInt(amount),
