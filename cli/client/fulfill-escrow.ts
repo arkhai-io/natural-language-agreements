@@ -178,9 +178,10 @@ async function main() {
         console.log("✨ Arbitration requested successfully!\n");
         console.log("🎯 Next Steps:");
         console.log("1. Wait for the oracle to arbitrate (usually a few seconds)");
-        console.log("2. Check the result with the oracle");
-        console.log("3. If approved, collect the escrow");
-        console.log(`\n   Fulfillment UID: ${fulfillmentAttestation.uid}`);
+        console.log("\n2. If approved, collect the escrow:");
+        console.log(`   nla escrow:collect \\`);
+        console.log(`     --escrow-uid ${escrowUid} \\`);
+        console.log(`     --fulfillment-uid ${fulfillmentAttestation.uid}`);
 
     } catch (error) {
         console.error("❌ Failed to fulfill escrow:", error);

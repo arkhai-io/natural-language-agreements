@@ -167,16 +167,10 @@ async function main() {
             deployment.addresses
         );
 
-        // Extend with LLM client
+        // Extend with LLM client (only for encoding the demand, no API calls needed)
         const llmClient = client.extend((c) => ({
             llm: makeLLMClient([]),
         }));
-
-        // Add OpenAI provider (needed for encoding demands)
-        llmClient.llm.addProvider({
-            providerName: "OpenAI",
-            apiKey: process.env.OPENAI_API_KEY || "",
-        });
 
         // Check token balance
         const tokenBalance = await walletClient.readContract({
@@ -228,10 +222,16 @@ Fulfillment: {{obligation}}`,
         console.log(`   Recipient: ${escrow.recipient}`);
 
         console.log("🎯 Next Steps:");
-        console.log("1. Wait for someone to fulfill the obligation");
-        console.log("2. The oracle will arbitrate the fulfillment");
-        console.log("3. If approved, you can collect the escrow");
-        console.log(`\n   Escrow UID: ${escrow.uid}`);
+        console.log("1. Someone fulfills the obligation:");
+        console.log(`   nla escrow:fulfill \\`);
+        console.log(`     --escrow-uid ${escrow.uid} \\`);
+        console.log(`     --fulfillment "Yes, the sky is blue" \\`);
+        console.log(`     --oracle ${oracleAddress}`);
+        console.log("\n2. The oracle will arbitrate the fulfillment automatically");
+        console.log("\n3. If approved, collect the escrow:");
+        console.log(`   nla escrow:collect \\`);
+        console.log(`     --escrow-uid ${escrow.uid} \\`);
+        console.log(`     --fulfillment-uid <fulfillment-uid>`);
 
     } catch (error) {
         console.error("❌ Failed to create escrow:", error);
