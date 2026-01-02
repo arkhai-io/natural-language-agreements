@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";
-import { makeLLMClient } from "../clients/nla";
-import type { LLMProvider, LLMDemand } from "../clients/nla";
+import { makeLLMClient } from "..";
+import type { LLMProvider, LLMDemand } from "..";
 import {
     setupTestEnvironment,
     type TestContext,

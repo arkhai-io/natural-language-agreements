@@ -3,7 +3,7 @@ import { parseArgs } from "util";
 import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
-import { makeLLMClient } from "../../clients/nla";
+import { makeLLMClient } from "../..";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";

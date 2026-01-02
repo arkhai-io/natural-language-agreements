@@ -8,7 +8,7 @@ import {
     setupTestEnvironment,
     type TestContext,
 } from "alkahest-ts";
-import { makeLLMClient } from "../clients/nla";
+import { makeLLMClient } from "..";
 
 let testContext: TestContext;
 let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
@@ -108,7 +108,7 @@ Fulfillment: {{obligation}}`,
     );
 
     //Should call WaitForArbitration()
-    await Bun.sleep(2000);
+    await Bun.sleep(5000);
 
     const collectionHash = await testContext.bob.client.erc20.collectEscrow(
         escrow.uid,

@@ -13,7 +13,7 @@ import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
-import { makeLLMClient } from "../../clients/nla.ts";
+import { makeLLMClient } from "../..";
 import {fixtures} from "alkahest-ts";
 
 // Helper function to display usage
