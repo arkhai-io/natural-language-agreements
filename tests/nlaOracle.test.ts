@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test";
-import { encodeAbiParameters, parseAbiParameters } from "viem";
+import { decodeAbiParameters, encodeAbiParameters, parseAbiParameters } from "viem";
 
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
@@ -9,6 +9,7 @@ import {
     type TestContext,
 } from "alkahest-ts";
 import { makeLLMClient } from "..";
+import { de } from "zod/v4/locales";
 
 let testContext: TestContext;
 let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
@@ -67,18 +68,17 @@ Fulfillment: {{obligation}}`,
     const obligationAbi = parseAbiParameters("(string item)");
     const { decisions, unwatch } =
         await testContext.bob.client.arbiters.general.trustedOracle.listenAndArbitrate(
-            async (attestation) => {
-                console.log("arbitrating");
-                const obligation = testContext.bob.client.extractObligationData(
+            async ({ attestation, demand }) => {
+                console.log("Arbitrating ", attestation, demand);
+                const obligation = charlieClient.extractObligationData(
                     obligationAbi,
                     attestation,
                 );
-                const [, demand] = await testContext.bob.client.getEscrowAndDemand(
-                    charlieClient.llm.LLMAbi,
-                    attestation,
-                );
-
-                const result = await charlieClient.llm.arbitrate(demand[0], obligation[0].item);
+                console.log("Obligation:", obligation);
+                const trustedOracleDemandData = testContext.bob.client.arbiters.general.trustedOracle.decodeDemand(demand);
+                const nlaDemandData = charlieClient.llm.decodeDemand(trustedOracleDemandData.data);
+                
+                const result = await charlieClient.llm.arbitrate(nlaDemandData, obligation[0].item);
                 console.log("response", result);
                 return result;
             },
