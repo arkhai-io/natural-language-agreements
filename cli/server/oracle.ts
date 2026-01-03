@@ -208,7 +208,7 @@ async function main() {
 
         // Start listening and arbitrating
         const { unwatch } = await client.arbiters.general.trustedOracle.listenAndArbitrate(
-            async (attestation: any) => {
+            async ({ attestation, demand }) => {
                 console.log(`\n📨 New arbitration request received!`);
                 console.log(`   Attestation UID: ${attestation.uid}`);
                 
@@ -218,21 +218,19 @@ async function main() {
                         obligationAbi,
                         attestation,
                     );
-                    console.log(`   Obligation: "${obligation[0].item}"`);
+                    const obligationItem = obligation[0].item;
+                    console.log(`   Obligation: "${obligationItem}"`);
 
-                    // Get demand data
-                    const [, demand] = await client.getEscrowAndDemand(
-                        llmClient.llm.LLMAbi,
-                        attestation,
-                    );
-                    console.log(`   Demand: "${demand[0].demand}"`);
-                    console.log(`   Model: ${demand[0].arbitrationModel}`);
+                    const trustedOracleDemandData = client.arbiters.general.trustedOracle.decodeDemand(demand);
+                    const nlaDemandData = llmClient.llm.decodeDemand(trustedOracleDemandData.data);
+                    console.log(`   Demand: "${nlaDemandData.demand}"`);
+                    console.log(`   Model: ${nlaDemandData.arbitrationModel}`);
 
                     // Perform arbitration using LLM
                     console.log(`   🤔 Arbitrating with AI...`);
                     const result = await llmClient.llm.arbitrate(
-                        demand[0],
-                        obligation[0].item
+                        nlaDemandData,
+                        obligationItem
                     );
 
                     console.log(`   ✨ Arbitration result: ${result ? "✅ APPROVED" : "❌ REJECTED"}`);

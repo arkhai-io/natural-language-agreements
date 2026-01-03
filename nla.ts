@@ -81,6 +81,11 @@ export const makeLLMClient = (
         );
     };
 
+    const decodeDemand = (data: `0x${string}`): LLMDemand => {
+        const decoded = decodeAbiParameters(LLMAbi, data);
+        return decoded[0];
+    };
+
     const arbitrate = async (demand: LLMDemand, obligation: string): Promise<boolean> => {
         try {
             const matchingProvider = providers.find(provider =>
@@ -176,6 +181,7 @@ Answer ONLY with 'true' or 'false' - no explanations or additional text.`;
         LLMAbi,
         arbitrate,
         encodeDemand,
+        decodeDemand,
         addProvider,
         getProvider,
         providers,
