@@ -27,6 +27,8 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.2",
     "@ai-sdk/openai": "^3.0.2",
+    "@openrouter/ai-sdk-provider": "^1.5.4",
+    "@perplexity-ai/ai-sdk": "^0.1.2",
     "@viem/anvil": "^0.0.10",
     "ai": "^6.0.5",
     "alkahest-ts": "github:arkhai-io/alkahest",

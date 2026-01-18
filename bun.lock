@@ -7,6 +7,8 @@
       "dependencies": {
         "@ai-sdk/anthropic": "^3.0.2",
         "@ai-sdk/openai": "^3.0.2",
+        "@openrouter/ai-sdk-provider": "^1.5.4",
+        "@perplexity-ai/ai-sdk": "^0.1.2",
         "@viem/anvil": "^0.0.10",
         "ai": "^6.0.5",
         "alkahest-ts": "github:arkhai-io/alkahest",
@@ -45,7 +47,13 @@
 
     "@noble/hashes": ["@noble/hashes@1.8.0", "", {}, "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="],
 
+    "@openrouter/ai-sdk-provider": ["@openrouter/ai-sdk-provider@1.5.4", "", { "dependencies": { "@openrouter/sdk": "^0.1.27" }, "peerDependencies": { "ai": "^5.0.0", "zod": "^3.24.1 || ^v4" } }, "sha512-xrSQPUIH8n9zuyYZR0XK7Ba0h2KsjJcMkxnwaYfmv13pKs3sDkjPzVPPhlhzqBGddHb5cFEwJ9VFuFeDcxCDSw=="],
+
+    "@openrouter/sdk": ["@openrouter/sdk@0.1.27", "", { "dependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-RH//L10bSmc81q25zAZudiI4kNkLgxF2E+WU42vghp3N6TEvZ6F0jK7uT3tOxkEn91gzmMw9YVmDENy7SJsajQ=="],
+
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
+
+    "@perplexity-ai/ai-sdk": ["@perplexity-ai/ai-sdk@0.1.2", "", { "peerDependencies": { "ai": "^5.0.0", "zod": "^4.0.0" } }, "sha512-7/f6zFA0ND48wMPlJzBqpm+LH4g3GdsVBVAb2LZn9Zt4V6rg/uzy9XTduTovbZa9YdaYTLg4wS6UpxH21ssU3g=="],
 
     "@scure/base": ["@scure/base@1.2.6", "", {}, "sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg=="],
 
@@ -67,7 +75,7 @@
 
     "ai": ["ai@6.0.5", "", { "dependencies": { "@ai-sdk/gateway": "3.0.4", "@ai-sdk/provider": "3.0.1", "@ai-sdk/provider-utils": "4.0.2", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-CKL3dDHedWskC6EY67LrULonZBU9vL+Bwa+xQEcprBhJfxpogntG3utjiAkYuy5ZQatyWk+SmWG8HLvcnhvbRg=="],
 
-    "alkahest-ts": ["alkahest-ts@github:arkhai-io/alkahest#3c53bc9", {}, "arkhai-io-alkahest-3c53bc9"],
+    "alkahest-ts": ["alkahest-ts@github:arkhai-io/alkahest#80a8273", { "dependencies": { "@viem/anvil": "^0.0.10", "arktype": "^2.1.23", "zod": "^3.25.76" }, "peerDependencies": { "typescript": "^5.9.3", "viem": "^2.38.3" } }, "arkhai-io-alkahest-80a8273"],
 
     "arkregex": ["arkregex@0.0.5", "", { "dependencies": { "@ark/util": "0.56.0" } }, "sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw=="],
 

@@ -63,14 +63,29 @@ if [ ! -d "../alkahest" ]; then
 fi
 echo -e "${GREEN}✅ alkahest repository found${NC}"
 
-# Check OpenAI API key
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo -e "${RED}❌ OPENAI_API_KEY not set${NC}"
-    echo "Please create a .env file with: OPENAI_API_KEY=sk-your-key-here"
-    echo "Or export it: export OPENAI_API_KEY=sk-your-key-here"
+# Check LLM API keys
+if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
+    echo -e "${RED}❌ No LLM provider API key set${NC}"
+    echo "Please add at least one API key to your .env file:"
+    echo "  OPENAI_API_KEY=sk-..."
+    echo "  ANTHROPIC_API_KEY=sk-ant-..."
+    echo "  OPENROUTER_API_KEY=sk-or-..."
     exit 1
 fi
-echo -e "${GREEN}✅ OpenAI API key configured${NC}\n"
+
+if [ -n "$OPENAI_API_KEY" ]; then
+    echo -e "${GREEN}✅ OpenAI API key configured${NC}"
+fi
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+    echo -e "${GREEN}✅ Anthropic API key configured${NC}"
+fi
+if [ -n "$OPENROUTER_API_KEY" ]; then
+    echo -e "${GREEN}✅ OpenRouter API key configured${NC}"
+fi
+if [ -n "$PERPLEXITY_API_KEY" ]; then
+    echo -e "${GREEN}✅ Perplexity API key configured${NC}"
+fi
+echo ""
 
 # Install dependencies
 echo -e "${BLUE}📦 Installing dependencies...${NC}\n"
@@ -102,13 +117,11 @@ fi
 
 # Deploy contracts
 echo -e "\n${BLUE}📝 Deploying contracts...${NC}\n"
-export DEPLOYER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 bun run cli/server/deploy.ts --network localhost --rpc-url http://localhost:8545
 
 # Start oracle
 echo -e "\n${BLUE}🚀 Starting oracle...${NC}\n"
-export ORACLE_PRIVATE_KEY="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-bun run cli/server/oracle.ts --deployment ./cli/deployments/localhost.json --openai-api-key "$OPENAI_API_KEY" --private-key "$ORACLE_PRIVATE_KEY"
+bun run cli/server/oracle.ts --deployment ./cli/deployments/localhost.json
 
 # Cleanup function
 cleanup() {

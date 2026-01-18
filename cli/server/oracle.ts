@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
 import { fixtures } from "alkahest-ts";
+import { ProviderName } from "../../nla";
 
 // Helper function to display usage
 function displayHelp() {
@@ -23,6 +24,7 @@ Options:
   --openai-api-key <key>       OpenAI API key (optional)
   --anthropic-api-key <key>    Anthropic API key (optional)
   --openrouter-api-key <key>   OpenRouter API key (optional)
+  --perplexity-api-key <key>   Perplexity API key for search tools (optional)
   --eas-contract <address>     EAS contract address (optional)
   --deployment <file>          Load addresses from deployment file (optional)
   --polling-interval <ms>      Polling interval in milliseconds (default: 5000)
@@ -34,6 +36,7 @@ Environment Variables (alternative to CLI options):
   OPENAI_API_KEY               OpenAI API key
   ANTHROPIC_API_KEY            Anthropic API key
   OPENROUTER_API_KEY           OpenRouter API key
+  PERPLEXITY_API_KEY           Perplexity API key for search tools
   EAS_CONTRACT_ADDRESS         EAS contract address
 
 Examples:
@@ -61,6 +64,7 @@ function parseCliArgs() {
             "openai-api-key": { type: "string" },
             "anthropic-api-key": { type: "string" },
             "openrouter-api-key": { type: "string" },
+            "perplexity-api-key": { type: "string" },
             "eas-contract": { type: "string" },
             "deployment": { type: "string" },
             "polling-interval": { type: "string" },
@@ -117,6 +121,7 @@ async function main() {
         const openaiApiKey = args["openai-api-key"] || process.env.OPENAI_API_KEY;
         const anthropicApiKey = args["anthropic-api-key"] || process.env.ANTHROPIC_API_KEY;
         const openrouterApiKey = args["openrouter-api-key"] || process.env.OPENROUTER_API_KEY;
+        const perplexityApiKey = args["perplexity-api-key"] || process.env.PERPLEXITY_API_KEY;
         const pollingInterval = parseInt(args["polling-interval"] || "5000");
 
         // Validate required parameters
@@ -152,6 +157,10 @@ async function main() {
         if (openrouterApiKey) availableProviders.push("OpenRouter");
         console.log(`  🤖 AI Providers: ${availableProviders.join(", ")}`);
         
+        if (perplexityApiKey) {
+            console.log(`  🔍 Perplexity Search: Enabled`);
+        }
+        
         if (easContract) {
             console.log(`  📝 EAS Contract: ${easContract}`);
         }
@@ -178,24 +187,27 @@ async function main() {
         // Add all available providers
         if (openaiApiKey) {
             llmClient.llm.addProvider({
-                providerName: "OpenAI",
+                providerName: ProviderName.OpenAI,
                 apiKey: openaiApiKey,
+                perplexityApiKey: perplexityApiKey,
             });
             console.log("✅ OpenAI provider configured");
         }
 
         if (anthropicApiKey) {
             llmClient.llm.addProvider({
-                providerName: "Anthropic",
+                providerName: ProviderName.Anthropic,
                 apiKey: anthropicApiKey,
+                perplexityApiKey: perplexityApiKey,
             });
             console.log("✅ Anthropic provider configured");
         }
 
         if (openrouterApiKey) {
             llmClient.llm.addProvider({
-                providerName: "OpenRouter",
+                providerName: ProviderName.OpenRouter,
                 apiKey: openrouterApiKey,
+                perplexityApiKey: perplexityApiKey,
             });
             console.log("✅ OpenRouter provider configured");
         }
@@ -207,7 +219,7 @@ async function main() {
         const obligationAbi = parseAbiParameters("(string item)");
 
         // Start listening and arbitrating
-        const { unwatch } = await client.arbiters.general.trustedOracle.listenAndArbitrate(
+        const { unwatch } = await client.arbiters.general.trustedOracle.arbitrateMany(
             async ({ attestation, demand }) => {
                 console.log(`\n📨 New arbitration request received!`);
                 console.log(`   Attestation UID: ${attestation.uid}`);

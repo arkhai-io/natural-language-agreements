@@ -10,6 +10,7 @@ import {
 } from "alkahest-ts";
 import { makeLLMClient } from "..";
 import { de } from "zod/v4/locales";
+import { ProviderName } from "../nla";
 
 let testContext: TestContext;
 let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
@@ -20,8 +21,16 @@ beforeAll(async () => {
         llm: makeLLMClient([]),
     }));
     charlieClient.llm.addProvider({
-        providerName: "OpenAI",
+        providerName: ProviderName.OpenAI,
         apiKey: process.env.OPENAI_API_KEY,
+    });
+    charlieClient.llm.addProvider({
+        providerName: ProviderName.OpenRouter,
+        apiKey: process.env.OPENROUTER_API_KEY,
+    });
+    charlieClient.llm.addProvider({
+        providerName: ProviderName.Anthropic,
+        apiKey: process.env.ANTHROPIC_API_KEY,
     });
 });
 
@@ -44,8 +53,8 @@ test("listenAndArbitrate Natural Language", async () => {
     const demand = testContext.alice.client.arbiters.general.trustedOracle.encodeDemand({
         oracle: testContext.bob.address,
         data: charlieClient.llm.encodeDemand({
-            arbitrationProvider: "OpenAI",
-            arbitrationModel: "gpt-4.1",
+            arbitrationProvider: ProviderName.OpenRouter,
+            arbitrationModel: "openai/gpt-4o",
             arbitrationPrompt: `Evaluate the fulfillment against the demand and decide whether the demand was validly fulfilled
 
 Demand: {{demand}}
@@ -67,7 +76,7 @@ Fulfillment: {{obligation}}`,
 
     const obligationAbi = parseAbiParameters("(string item)");
     const { decisions, unwatch } =
-        await testContext.bob.client.arbiters.general.trustedOracle.listenAndArbitrate(
+        await testContext.bob.client.arbiters.general.trustedOracle.arbitrateMany(
             async ({ attestation, demand }) => {
                 console.log("Arbitrating ", attestation, demand);
                 const obligation = charlieClient.extractObligationData(
