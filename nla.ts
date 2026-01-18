@@ -49,15 +49,23 @@ import {
     encodeAbiParameters,
     parseAbiParameters,
 } from "viem";
-import { generateText } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { perplexitySearch } from '@perplexity-ai/ai-sdk';
 
+export enum ProviderName {
+    OpenAI = "OpenAI",
+    Anthropic = "Anthropic",
+    OpenRouter = "OpenRouter",
+}
 
 export type LLMProvider = {
-    providerName: string;
+    providerName: ProviderName | string;
     apiKey?: string;
     baseURL?: string; // For OpenRouter or custom endpoints
+    perplexityApiKey?: string; // For Perplexity AI
 };
 
 export type LLMDemand = {
@@ -66,6 +74,22 @@ export type LLMDemand = {
     arbitrationPrompt: string;
     demand: string;
 };
+
+const cleanBool = (raw: string) => {
+  let t = raw.trim().toLowerCase();
+
+  // strip <tag>... </tag>
+  t = t.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+  // strip code fences
+  t = t.replace(/```[\s\S]*?```/g, "").trim();
+
+  // strip result: and similar prefixes
+  t = t.replace(/^(result:|answer:)\s*/g, "").trim();
+
+  return t;
+};
+
 
 export const makeLLMClient = (
     providers: LLMProvider[],
@@ -88,6 +112,7 @@ export const makeLLMClient = (
 
     const arbitrate = async (demand: LLMDemand, obligation: string): Promise<boolean> => {
         try {
+            console.log(demand);
             const matchingProvider = providers.find(provider =>
                 provider.providerName.toLowerCase().includes(demand.arbitrationProvider.toLowerCase()) ||
                 demand.arbitrationProvider.toLowerCase().includes(provider.providerName.toLowerCase())
@@ -113,8 +138,7 @@ Answer ONLY with 'true' or 'false' - no explanations or additional text.`;
 
             let text: string;
             const providerName = selectedProvider.providerName.toLowerCase();
-
-            if (providerName === 'openai' || providerName.includes('openai')) {
+            if (providerName === ProviderName.OpenAI.toLowerCase() || providerName.includes('openai')) {
                 const openai = createOpenAI({
                     apiKey: selectedProvider.apiKey,
                     baseURL: selectedProvider.baseURL,
@@ -122,12 +146,15 @@ Answer ONLY with 'true' or 'false' - no explanations or additional text.`;
 
                 const result = await generateText({
                     model: openai(demand.arbitrationModel),
+                    tools: {
+                        web_search: openai.tools.webSearch({}),
+                    },
                     system: systemPrompt,
                     prompt: userPrompt,
                 });
                 text = result.text;
 
-            } else if (providerName === 'anthropic' || providerName.includes('anthropic') || providerName.includes('claude')) {
+            } else if (providerName === ProviderName.Anthropic.toLowerCase() || providerName.includes('anthropic') || providerName.includes('claude')) {
                 const anthropic = createAnthropic({
                     apiKey: selectedProvider.apiKey,
                     baseURL: selectedProvider.baseURL,
@@ -135,22 +162,30 @@ Answer ONLY with 'true' or 'false' - no explanations or additional text.`;
 
                 const result = await generateText({
                     model: anthropic(demand.arbitrationModel),
+                   tools: {
+                        search: perplexitySearch({apiKey: selectedProvider.perplexityApiKey}),
+                    },
                     system: systemPrompt,
                     prompt: userPrompt,
+                   
                 });
                 text = result.text;
 
-            } else if (providerName === 'openrouter' || providerName.includes('openrouter')) {
+            } else if (providerName === ProviderName.OpenRouter.toLowerCase() || providerName.includes('openrouter')) {
                 // OpenRouter uses OpenAI-compatible API
-                const openrouter = createOpenAI({
+                const openrouter = createOpenRouter({
                     apiKey: selectedProvider.apiKey,
                     baseURL: selectedProvider.baseURL,
                 });
 
                 const result = await generateText({
-                    model: openrouter(demand.arbitrationModel),
+                    model: openrouter.chat(demand.arbitrationModel),
+                    tools: {
+                        search: perplexitySearch({apiKey: selectedProvider.perplexityApiKey}),
+                    },
                     system: systemPrompt,
                     prompt: userPrompt,
+                    maxOutputTokens: 512,
                 });
                 text = result.text;
 
@@ -160,7 +195,7 @@ Answer ONLY with 'true' or 'false' - no explanations or additional text.`;
 
             console.log(`LLM Response: ${text}`);
 
-            const cleanedResponse = text.trim().toLowerCase();
+            const cleanedResponse = cleanBool(text);
             return cleanedResponse === 'true';
 
         } catch (error) {
