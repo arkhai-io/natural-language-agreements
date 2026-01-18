@@ -219,7 +219,7 @@ async function main() {
         const obligationAbi = parseAbiParameters("(string item)");
 
         // Start listening and arbitrating
-        const { unwatch } = await client.arbiters.general.trustedOracle.listenAndArbitrate(
+        const { unwatch } = await client.arbiters.general.trustedOracle.arbitrateMany(
             async ({ attestation, demand }) => {
                 console.log(`\n📨 New arbitration request received!`);
                 console.log(`   Attestation UID: ${attestation.uid}`);

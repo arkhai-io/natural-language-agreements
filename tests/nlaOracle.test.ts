@@ -76,7 +76,7 @@ Fulfillment: {{obligation}}`,
 
     const obligationAbi = parseAbiParameters("(string item)");
     const { decisions, unwatch } =
-        await testContext.bob.client.arbiters.general.trustedOracle.listenAndArbitrate(
+        await testContext.bob.client.arbiters.general.trustedOracle.arbitrateMany(
             async ({ attestation, demand }) => {
                 console.log("Arbitrating ", attestation, demand);
                 const obligation = charlieClient.extractObligationData(
