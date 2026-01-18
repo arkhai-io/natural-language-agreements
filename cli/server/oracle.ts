@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
 import { fixtures } from "alkahest-ts";
+import { ProviderName } from "../../nla";
 
 // Helper function to display usage
 function displayHelp() {
@@ -186,7 +187,7 @@ async function main() {
         // Add all available providers
         if (openaiApiKey) {
             llmClient.llm.addProvider({
-                providerName: "OpenAI",
+                providerName: ProviderName.OpenAI,
                 apiKey: openaiApiKey,
                 perplexityApiKey: perplexityApiKey,
             });
@@ -195,7 +196,7 @@ async function main() {
 
         if (anthropicApiKey) {
             llmClient.llm.addProvider({
-                providerName: "Anthropic",
+                providerName: ProviderName.Anthropic,
                 apiKey: anthropicApiKey,
                 perplexityApiKey: perplexityApiKey,
             });
@@ -204,7 +205,7 @@ async function main() {
 
         if (openrouterApiKey) {
             llmClient.llm.addProvider({
-                providerName: "OpenRouter",
+                providerName: ProviderName.OpenRouter,
                 apiKey: openrouterApiKey,
                 perplexityApiKey: perplexityApiKey,
             });
