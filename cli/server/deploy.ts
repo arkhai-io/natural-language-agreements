@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Deployment script for Alkahest Natural Language Agreement Oracle
  * 
@@ -54,7 +54,7 @@ Examples:
 // Parse command line arguments
 function parseCliArgs() {
     const { values } = parseArgs({
-        args: Bun.argv.slice(2),
+        args: process.argv.slice(2),
         options: {
             "network": { type: "string" },
             "rpc-url": { type: "string" },

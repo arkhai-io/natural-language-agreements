@@ -1,15 +1,45 @@
 {
-  "name": "natural-language-agreement-extension",
-  "module": "index.ts",
+  "name": "nla",
+  "version": "1.0.0",
+  "description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "private": false,
+  "author": "Arkhai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arkhai-io/natural-language-agreements.git"
   },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "smart-contracts",
+    "natural-language",
+    "oracle",
+    "ai",
+    "llm",
+    "escrow"
+  ],
   "bin": {
-    "nla": "cli/index.ts"
+    "nla": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    ".env.example"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "preferGlobal": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "dev": "bun run index.ts",
     "start": "bun run index.ts",
     "test": "bun test ./tests --exclude alkahest-ts/** ",

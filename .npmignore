@@ -1,0 +1,52 @@
+# Source files (only compiled JS will be included)
+*.ts
+!*.d.ts
+
+# Tests
+tests/
+**/*.test.ts
+**/*.test.js
+
+# Build config
+tsconfig.json
+tsconfig.build.json
+bun.lockb
+
+# Development
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+anvil.log
+.anvil.pid
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Documentation (keep README.md)
+docs/
+
+# Deployments
+deployments/
+
+# Node modules (will be installed by user)
+node_modules/
+
+# Parent directory references
+../

@@ -1,11 +1,20 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { parseArgs } from "util";
 import { spawnSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 import { createPublicClient, http, parseAbiParameters, decodeAbiParameters } from "viem";
 import { foundry } from "viem/chains";
 import { contracts } from "alkahest-ts";
+
+import { runDevCommand } from "./commands/dev.js";
+import { runStopCommand } from "./commands/stop.js";
+
+// Get the directory name for ESM modules (compatible with both Node and Bun)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 // Helper function to display usage
 function displayHelp() {
     console.log(`
@@ -83,7 +92,7 @@ Examples:
 
 // Parse command line arguments
 function parseCliArgs() {
-    const args = Bun.argv.slice(2);
+    const args = process.argv.slice(2);
     
     if (args.length === 0) {
         displayHelp();
@@ -120,27 +129,9 @@ function parseCliArgs() {
     return { command, ...values };
 }
 
-// Shell command handler
-async function runShellCommand(scriptName: string, args: string[] = []) {
-    const { spawnSync } = await import("child_process");
-    const scriptDir = import.meta.dir;
-    const scriptPath = `${scriptDir}/scripts/${scriptName}`;
-    
-    // Run the shell script
-    const result = spawnSync(scriptPath, args, {
-        stdio: "inherit",
-        cwd: process.cwd(),
-        shell: true,
-    });
-
-    process.exit(result.status || 0);
-}
-
 // Server command handler (for deploy.ts, oracle.ts)
 async function runServerCommand(scriptName: string, args: string[] = []) {
-    const { spawnSync } = await import("child_process");
-    const scriptDir = import.meta.dir;
-    const scriptPath = `${scriptDir}/server/${scriptName}`;
+    const scriptPath = join(__dirname, "server", scriptName);
     
     // Run the TypeScript file directly
     const result = spawnSync("bun", ["run", scriptPath, ...args], {
@@ -157,25 +148,25 @@ async function main() {
         const args = parseCliArgs();
         const command = args.command;
 
-        // Handle shell script commands (dev and stop need shell for process management)
+        // Handle dev and stop commands
         if (command === "dev") {
-            await runShellCommand("dev.sh");
+            await runDevCommand(__dirname);
             return;
         }
         
         if (command === "stop") {
-            await runShellCommand("stop.sh");
+            await runStopCommand();
             return;
         }
 
         // Handle TypeScript commands that can run directly
         if (command === "deploy") {
-            await runServerCommand("deploy.ts", Bun.argv.slice(3));
+            await runServerCommand("deploy.js", process.argv.slice(3));
             return;
         }
         
         if (command === "start-oracle") {
-            await runServerCommand("oracle.ts", Bun.argv.slice(3));
+            await runServerCommand("oracle.js", process.argv.slice(3));
             return;
         }
 
@@ -184,13 +175,13 @@ async function main() {
         
         switch (command) {
             case "escrow:create":
-                scriptPath = "./client/create-escrow.ts";
+                scriptPath = "./client/create-escrow.js";
                 break;
             case "escrow:fulfill":
-                scriptPath = "./client/fulfill-escrow.ts";
+                scriptPath = "./client/fulfill-escrow.js";
                 break;
             case "escrow:collect":
-                scriptPath = "./client/collect-escrow.ts";
+                scriptPath = "./client/collect-escrow.js";
                 break;
             case "escrow:status":
                 await runStatusCommand(args);
@@ -203,11 +194,10 @@ async function main() {
 
         // Run the command as a subprocess with the args (excluding the command name)
         const { spawnSync } = await import("child_process");
-        const scriptDir = import.meta.dir;
-        const fullScriptPath = `${scriptDir}/${scriptPath}`;
+        const fullScriptPath = join(__dirname, scriptPath);
         
         // Build args array without the command name
-        const commandArgs = Bun.argv.slice(3); // Skip bun, script, and command
+        const commandArgs = process.argv.slice(3); // Skip node, script, and command
         
         const result = spawnSync("bun", ["run", fullScriptPath, ...commandArgs], {
             stdio: "inherit",

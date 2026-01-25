@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { parseArgs } from "util";
 import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -57,7 +57,7 @@ Examples:
 // Parse command line arguments
 function parseCliArgs() {
     const { values } = parseArgs({
-        args: Bun.argv.slice(2),
+        args: process.argv.slice(2),
         options: {
             "rpc-url": { type: "string" },
             "private-key": { type: "string" },
