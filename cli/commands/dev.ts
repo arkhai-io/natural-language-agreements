@@ -168,7 +168,11 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     // Start oracle
     console.log(`\n${colors.blue}🚀 Starting oracle...${colors.reset}\n`);
     const oracleScript = join(cliDir, 'server', 'oracle.js');
-    const deploymentFile = join(cliDir, 'deployments', 'localhost.json');
+    
+    // Look for deployment file in source directory (for local dev) or dist directory (for installed package)
+    const sourcePath = join(process.cwd(), 'cli', 'deployments', 'devnet.json');
+    const distPath = join(cliDir, 'deployments', 'devnet.json');
+    const deploymentFile = existsSync(sourcePath) ? sourcePath : distPath;
     
     const oracleProcess = spawn('bun', ['run', oracleScript, '--deployment', deploymentFile], {
         stdio: 'inherit',

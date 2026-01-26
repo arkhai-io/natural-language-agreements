@@ -11,6 +11,7 @@ import { contracts } from "alkahest-ts";
 
 import { runDevCommand } from "./commands/dev.js";
 import { runStopCommand } from "./commands/stop.js";
+import { runSwitchCommand } from "./commands/switch.js";
 
 // Get the directory name for ESM modules (compatible with both Node and Bun)
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,8 @@ Commands:
   deploy           Deploy contracts to blockchain
   start-oracle     Start the oracle service
   stop             Stop all services (Anvil + Oracle)
+  switch [env]     Switch between environments (devnet, sepolia, mainnet)
+  network          Show current network/environment
   escrow:create    Create a new escrow with natural language demand
   escrow:fulfill   Fulfill an existing escrow
   escrow:collect   Collect an approved escrow
@@ -127,8 +130,10 @@ function parseCliArgs() {
             "arbitration-model": { type: "string" },
             "arbitration-prompt": { type: "string" },
             "env": { type: "string" },
+            "environment": { type: "string" },
         },
-        strict: true,
+        strict: command !== "switch" && command !== "network", // Allow positional args for switch command
+        allowPositionals: command === "switch" || command === "network",
     });
 
     return { command, ...values };
@@ -161,6 +166,19 @@ async function main() {
         
         if (command === "stop") {
             await runStopCommand();
+            return;
+        }
+
+        if (command === "switch") {
+            // Get environment from either --environment flag or second positional arg
+            const env = args.environment as string | undefined || process.argv[3];
+            runSwitchCommand(env);
+            return;
+        }
+
+        if (command === "network") {
+            // Show current network (same as switch with no args)
+            runSwitchCommand();
             return;
         }
 

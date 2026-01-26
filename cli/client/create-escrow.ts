@@ -11,17 +11,61 @@ import { createWalletClient, http, publicActions, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
 import {fixtures} from "alkahest-ts";
+import { getCurrentEnvironment } from "../commands/switch.js";
+
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Helper function to find deployment file
+function findDeploymentFile(deploymentPath: string, environment?: string): string | null {
+    // If no path provided, use current environment
+    if (!deploymentPath) {
+        const env = environment || getCurrentEnvironment();
+        deploymentPath = `./cli/deployments/${env}.json`;
+    }
+    
+    // Try the provided path first
+    if (existsSync(resolve(deploymentPath))) {
+        return resolve(deploymentPath);
+    }
+    
+    // Try relative to current working directory
+    const cwdPath = resolve(process.cwd(), deploymentPath);
+    if (existsSync(cwdPath)) {
+        return cwdPath;
+    }
+    
+    // Try relative to the CLI installation directory with current environment
+    const env = environment || getCurrentEnvironment();
+    const cliPath = resolve(__dirname, "..", "deployments", `${env}.json`);
+    if (existsSync(cliPath)) {
+        return cliPath;
+    }
+    
+    // Try in the project root (for local development)
+    const projectPath = resolve(__dirname, "..", "..", "cli", "deployments", `${env}.json`);
+    if (existsSync(projectPath)) {
+        return projectPath;
+    }
+    
+    return null;
+}
 
 // Helper function to display usage
 function displayHelp() {
+    const currentEnv = getCurrentEnvironment();
     console.log(`
 Natural Language Agreement Escrow CLI
 
 Create an escrow with a natural language demand that will be arbitrated by an oracle.
+
+Current environment: ${currentEnv}
 
 Usage:
   bun cli/create-escrow.ts [options]
@@ -32,7 +76,7 @@ Options:
   --token <address>            ERC20 token address (required)
   --oracle <address>           Oracle address that will arbitrate (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
+  --deployment <path>          Path to deployment file (default: current environment)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --arbitration-provider <name> Arbitration provider (default: OpenAI)
   --arbitration-model <model>  Arbitration model (default: gpt-4o-mini)
@@ -97,7 +141,7 @@ async function main() {
         const tokenAddress = args.token;
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
+        const deploymentPath = args.deployment || `./cli/deployments/${getCurrentEnvironment()}.json`;
         
         // Arbitration configuration with defaults
         const arbitrationProvider = args["arbitration-provider"] || "OpenAI";
@@ -141,13 +185,18 @@ Fulfillment: {{obligation}}`;
         }
 
         // Load deployment file
-        if (!existsSync(resolve(deploymentPath))) {
+        const resolvedDeploymentPath = findDeploymentFile(deploymentPath);
+        if (!resolvedDeploymentPath) {
             console.error(`❌ Error: Deployment file not found: ${deploymentPath}`);
             console.error("Please deploy contracts first or specify correct path with --deployment");
+            console.error("\nSearched in:");
+            console.error(`  - ${resolve(deploymentPath)}`);
+            console.error(`  - ${resolve(process.cwd(), deploymentPath)}`);
+            console.error(`  - ${resolve(__dirname, "..", "deployments", "devnet.json")}`);
             process.exit(1);
         }
 
-        const deployment = JSON.parse(readFileSync(resolve(deploymentPath), "utf-8"));
+        const deployment = JSON.parse(readFileSync(resolvedDeploymentPath, "utf-8"));
         const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
 
         console.log("🚀 Creating Natural Language Agreement Escrow\n");

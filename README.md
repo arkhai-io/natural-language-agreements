@@ -79,7 +79,7 @@ export OPENAI_API_KEY=sk-your-key-here
 nla deploy
 ```
 
-This creates `cli/deployments/localhost.json` with all contract addresses.
+This creates `cli/deployments/devnet.json` with all contract addresses.
 
 #### 3. Start Oracle
 
@@ -316,7 +316,7 @@ natural-language-agreements/
 │   │   ├── start-oracle.sh       # Oracle starter
 │   │   └── stop.sh               # Cleanup script
 │   └── deployments/              # Deployment addresses (generated)
-│       ├── localhost.json
+│       ├── devnet.json
 │       ├── sepolia.json
 │       └── mainnet.json
 ├── nla.ts                        # Natural Language Agreement client library

@@ -329,7 +329,10 @@ async function main() {
         // Get the script directory and go up to project root, then into cli/deployments
         const scriptDir = import.meta.dir;
         const projectRoot = resolve(scriptDir, "../..");
-        const outputPath = args.output || resolve(projectRoot, `cli/deployments/${network}.json`);
+        
+        // Map localhost to devnet for file naming
+        const deploymentFileName = network === "localhost" ? "devnet" : network;
+        const outputPath = args.output || resolve(projectRoot, `cli/deployments/${deploymentFileName}.json`);
         const outputDir = resolve(outputPath, "..");
         
         if (!existsSync(outputDir)) {
