@@ -1,6 +1,6 @@
 {
   "name": "nla",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
   "type": "module",
   "private": false,
@@ -44,7 +44,7 @@
     "minor": "npm version minor",
     "major": "npm version major",
     "dev": "bun run index.ts",
-    "public":"npm publish --access public",
+    "public": "npm publish --access public",
     "start": "bun run index.ts",
     "test": "bun test ./tests --exclude alkahest-ts/** ",
     "setup": "bun run cli/index.ts dev",
