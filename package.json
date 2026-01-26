@@ -1,6 +1,6 @@
 {
   "name": "nla",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
   "type": "module",
   "private": false,
