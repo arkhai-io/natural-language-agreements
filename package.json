@@ -44,6 +44,7 @@
     "minor": "npm version minor",
     "major": "npm version major",
     "dev": "bun run index.ts",
+    "public":"npm publish --access public",
     "start": "bun run index.ts",
     "test": "bun test ./tests --exclude alkahest-ts/** ",
     "setup": "bun run cli/index.ts dev",
