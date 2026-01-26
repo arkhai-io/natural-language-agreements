@@ -205,6 +205,42 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     process.on('SIGINT', cleanup);
     process.on('SIGTERM', cleanup);
 
+    // Open a new terminal
+    console.log(`\n${colors.green}✅ Setup complete!${colors.reset}`);
+    console.log(`${colors.blue}Opening new terminal...${colors.reset}\n`);
+    
+    try {
+        // For macOS, open a new Terminal window
+        if (process.platform === 'darwin') {
+            spawn('osascript', [
+                '-e',
+                `tell application "Terminal" to do script "cd ${process.cwd()}"`
+            ], { detached: true, stdio: 'ignore' }).unref();
+        } 
+        // For Linux, try common terminal emulators
+        else if (process.platform === 'linux') {
+            const terminals = ['gnome-terminal', 'konsole', 'xterm'];
+            for (const term of terminals) {
+                if (commandExists(term)) {
+                    spawn(term, ['--working-directory', process.cwd()], { 
+                        detached: true, 
+                        stdio: 'ignore' 
+                    }).unref();
+                    break;
+                }
+            }
+        }
+        // For Windows
+        else if (process.platform === 'win32') {
+            spawn('cmd', ['/c', 'start', 'cmd', '/K', `cd /d ${process.cwd()}`], { 
+                detached: true, 
+                stdio: 'ignore' 
+            }).unref();
+        }
+    } catch (e) {
+        console.log(`${colors.yellow}⚠️  Could not open new terminal automatically${colors.reset}`);
+    }
+
     // Keep process alive
     await new Promise(() => {});
 }
