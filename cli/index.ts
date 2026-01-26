@@ -48,6 +48,7 @@ Options (vary by command):
   --arbitration-provider <name> Arbitration provider (create, default: OpenAI)
   --arbitration-model <model>  Arbitration model (create, default: gpt-4o-mini)
   --arbitration-prompt <text>  Custom arbitration prompt (create, optional)
+  --env <file>                 Path to .env file (dev, default: .env)
 
 Environment Variables:
   PRIVATE_KEY                  Private key for transactions
@@ -57,6 +58,9 @@ Environment Variables:
 Examples:
   # Start development environment
   nla dev
+
+  # Start development with custom .env file
+  nla dev --env /path/to/.env.production
 
   # Deploy contracts
   nla deploy
@@ -122,6 +126,7 @@ function parseCliArgs() {
             "arbitration-provider": { type: "string" },
             "arbitration-model": { type: "string" },
             "arbitration-prompt": { type: "string" },
+            "env": { type: "string" },
         },
         strict: true,
     });
@@ -150,7 +155,7 @@ async function main() {
 
         // Handle dev and stop commands
         if (command === "dev") {
-            await runDevCommand(__dirname);
+            await runDevCommand(__dirname, args.env as string | undefined);
             return;
         }
         

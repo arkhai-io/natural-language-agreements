@@ -12,10 +12,9 @@ const colors = {
 };
 
 // Load .env file if it exists
-function loadEnvFile() {
-    const envPath = '.env';
+function loadEnvFile(envPath: string = '.env') {
     if (existsSync(envPath)) {
-        console.log(`${colors.blue}📄 Loading .env file...${colors.reset}`);
+        console.log(`${colors.blue}📄 Loading .env file from: ${envPath}${colors.reset}`);
         const envContent = readFileSync(envPath, 'utf-8');
         const lines = envContent.split('\n');
         
@@ -35,6 +34,10 @@ function loadEnvFile() {
             }
         }
         console.log(`${colors.green}✅ Environment variables loaded${colors.reset}`);
+    } else if (envPath !== '.env') {
+        // Only error if a custom path was specified but not found
+        console.error(`${colors.red}❌ .env file not found at: ${envPath}${colors.reset}`);
+        process.exit(1);
     }
 }
 
@@ -63,13 +66,13 @@ function isPortInUse(port: number): boolean {
 }
 
 // Dev command - Start complete development environment
-export async function runDevCommand(cliDir: string) {
+export async function runDevCommand(cliDir: string, envPath?: string) {
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}`);
     console.log(`${colors.blue}  Natural Language Agreement Oracle - Quick Setup${colors.reset}`);
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}\n`);
 
     // Load .env file first
-    loadEnvFile();
+    loadEnvFile(envPath);
     console.log('');
 
     // Check prerequisites
