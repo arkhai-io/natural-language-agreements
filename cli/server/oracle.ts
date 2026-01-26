@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { parseArgs } from "util";
 import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -44,7 +44,7 @@ Examples:
   bun oracle.ts --rpc-url http://localhost:8545 --private-key 0x... --openai-api-key sk-...
 
   # Using deployment file
-  bun oracle.ts --deployment ./deployments/localhost.json --private-key 0x... --openai-api-key sk-...
+  bun oracle.ts --deployment ./deployments/devnet.json --private-key 0x... --openai-api-key sk-...
 
   # Using environment variables
   export OPENAI_API_KEY=sk-...
@@ -57,7 +57,7 @@ Examples:
 // Parse command line arguments
 function parseCliArgs() {
     const { values } = parseArgs({
-        args: Bun.argv.slice(2),
+        args: process.argv.slice(2),
         options: {
             "rpc-url": { type: "string" },
             "private-key": { type: "string" },

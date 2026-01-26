@@ -8,10 +8,43 @@
 import { parseArgs } from "util";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
+import { getChainFromNetwork } from "../utils.js";
+
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Helper function to find deployment file
+function findDeploymentFile(deploymentPath: string): string | null {
+    // Try the provided path first
+    if (existsSync(resolve(deploymentPath))) {
+        return resolve(deploymentPath);
+    }
+    
+    // Try relative to current working directory
+    const cwdPath = resolve(process.cwd(), deploymentPath);
+    if (existsSync(cwdPath)) {
+        return cwdPath;
+    }
+    
+    // Try relative to the CLI installation directory
+    const cliPath = resolve(__dirname, "..", "deployments", "devnet.json");
+    if (existsSync(cliPath)) {
+        return cliPath;
+    }
+    
+    // Try in the project root (for local development)
+    const projectPath = resolve(__dirname, "..", "..", "cli", "deployments", "devnet.json");
+    if (existsSync(projectPath)) {
+        return projectPath;
+    }
+    
+    return null;
+}
 
 // Helper function to display usage
 function displayHelp() {
@@ -27,7 +60,7 @@ Options:
   --escrow-uid <uid>           Escrow UID to collect (required)
   --fulfillment-uid <uid>      Fulfillment UID that was approved (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./cli/deployments/localhost.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/devnet.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 
@@ -80,7 +113,7 @@ async function main() {
         const escrowUid = args["escrow-uid"];
         const fulfillmentUid = args["fulfillment-uid"];
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./cli/deployments/localhost.json";
+        const deploymentPath = args.deployment || "./cli/deployments/devnet.json";
 
         // Validate required parameters
         if (!escrowUid) {
@@ -102,14 +135,20 @@ async function main() {
         }
 
         // Load deployment file
-        if (!existsSync(resolve(deploymentPath))) {
+        const resolvedDeploymentPath = findDeploymentFile(deploymentPath);
+        if (!resolvedDeploymentPath) {
             console.error(`❌ Error: Deployment file not found: ${deploymentPath}`);
             console.error("Please deploy contracts first or specify correct path with --deployment");
+            console.error("\nSearched in:");
+            console.error(`  - ${resolve(deploymentPath)}`);
+            console.error(`  - ${resolve(process.cwd(), deploymentPath)}`);
+            console.error(`  - ${resolve(__dirname, "..", "deployments", "devnet.json")}`);
             process.exit(1);
         }
 
-        const deployment = JSON.parse(readFileSync(resolve(deploymentPath), "utf-8"));
+        const deployment = JSON.parse(readFileSync(resolvedDeploymentPath, "utf-8"));
         const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
+        const chain = getChainFromNetwork(deployment.network);
 
         console.log("🚀 Collecting Natural Language Agreement Escrow\n");
         console.log("Configuration:");
@@ -121,7 +160,7 @@ async function main() {
         const account = privateKeyToAccount(privateKey as `0x${string}`);
         const walletClient = createWalletClient({
             account,
-            chain: foundry,
+            chain,
             transport: http(rpcUrl),
         }).extend(publicActions);
 

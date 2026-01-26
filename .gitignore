@@ -41,4 +41,4 @@ anvil.log
 .env
 
 # Local deployment files
-cli/deployments/localhost.json
+cli/deployments/devnet.json
