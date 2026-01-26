@@ -9,12 +9,12 @@
 import { parseArgs } from "util";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { foundry } from "viem/chains";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
+import { getChainFromNetwork } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -160,19 +160,21 @@ async function main() {
 
         const deployment = JSON.parse(readFileSync(resolvedDeploymentPath, "utf-8"));
         const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
+        const chain = getChainFromNetwork(deployment.network);
 
         console.log("🚀 Fulfilling Natural Language Agreement Escrow\n");
         console.log("Configuration:");
         console.log(`  📦 Escrow UID: ${escrowUid}`);
         console.log(`  📝 Fulfillment: "${fulfillment}"`);
         console.log(`  ⚖️  Oracle: ${oracleAddress}`);
+        console.log(`  🌐 Network: ${deployment.network}`);
         console.log(`  🌐 RPC URL: ${rpcUrl}\n`);
 
         // Create account and wallet
         const account = privateKeyToAccount(privateKey as `0x${string}`);
         const walletClient = createWalletClient({
             account,
-            chain: foundry,
+            chain,
             transport: http(rpcUrl),
         }).extend(publicActions);
 
