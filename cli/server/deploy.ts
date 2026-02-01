@@ -9,7 +9,7 @@
 import { parseArgs } from "util";
 import { createWalletClient, http, publicActions, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet, sepolia, foundry } from "viem/chains";
+import { mainnet, sepolia, baseSepolia, foundry } from "viem/chains";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { fixtures, contracts } from "alkahest-ts";
@@ -23,7 +23,7 @@ Usage:
   bun deploy.ts [options]
 
 Options:
-  --network <name>             Network to deploy to: mainnet, sepolia, localhost (required)
+  --network <name>             Network to deploy to: mainnet, sepolia, base-sepolia, localhost (required)
   --rpc-url <url>              Custom RPC URL (overrides network default)
   --private-key <key>          Deployer's private key (required)
   --output <path>              Output file for deployment addresses (default: ./cli/deployments/<network>.json)
@@ -36,6 +36,7 @@ Environment Variables (alternative to CLI options):
 Networks:
   mainnet                      Ethereum Mainnet
   sepolia                      Ethereum Sepolia Testnet
+  base-sepolia                 Base Sepolia Testnet
   localhost                    Local development (Anvil/Hardhat)
 
 Examples:
@@ -75,11 +76,13 @@ function getChain(network: string) {
             return mainnet;
         case "sepolia":
             return sepolia;
+        case "base-sepolia":
+            return baseSepolia;
         case "localhost":
         case "local":
             return foundry;
         default:
-            throw new Error(`Unknown network: ${network}. Use mainnet, sepolia, or localhost`);
+            throw new Error(`Unknown network: ${network}. Use mainnet, sepolia, base-sepolia, or localhost`);
     }
 }
 
@@ -368,16 +371,6 @@ async function main() {
         console.log("\n🎯 Next steps:");
         console.log("1. Start the oracle:");
         console.log(`   nla start-oracle`);
-        console.log("\n2. Export your private key (use a test account private key):");
-        console.log(`   export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`);
-        console.log("\n3. Create an escrow:");
-        console.log(`   nla escrow:create \\`);
-        console.log(`     --demand "The sky is blue" \\`);
-        console.log(`     --amount 10 \\`);
-        console.log(`     --token ${addresses.mockERC20A} \\`);
-        console.log(`     --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \\`);
-        console.log(`     --arbitration-provider "OpenAI" \\`);
-        console.log(`     --arbitration-model "gpt-4o-mini"`);
 
     } catch (error) {
         console.error("❌ Deployment failed:", error);

@@ -6,45 +6,17 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions } from "viem";
+import { createWalletClient, http, publicActions, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
-import { getChainFromNetwork } from "../utils.js";
+import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Helper function to find deployment file
-function findDeploymentFile(deploymentPath: string): string | null {
-    // Try the provided path first
-    if (existsSync(resolve(deploymentPath))) {
-        return resolve(deploymentPath);
-    }
-    
-    // Try relative to current working directory
-    const cwdPath = resolve(process.cwd(), deploymentPath);
-    if (existsSync(cwdPath)) {
-        return cwdPath;
-    }
-    
-    // Try relative to the CLI installation directory
-    const cliPath = resolve(__dirname, "..", "deployments", "devnet.json");
-    if (existsSync(cliPath)) {
-        return cliPath;
-    }
-    
-    // Try in the project root (for local development)
-    const projectPath = resolve(__dirname, "..", "..", "cli", "deployments", "devnet.json");
-    if (existsSync(projectPath)) {
-        return projectPath;
-    }
-    
-    return null;
-}
 
 // Helper function to display usage
 function displayHelp() {
@@ -112,8 +84,8 @@ async function main() {
         // Get configuration
         const escrowUid = args["escrow-uid"];
         const fulfillmentUid = args["fulfillment-uid"];
-        const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./cli/deployments/devnet.json";
+        const privateKey = args["private-key"] || getPrivateKey();
+        const deploymentPath = args.deployment;
 
         // Validate required parameters
         if (!escrowUid) {
@@ -129,24 +101,25 @@ async function main() {
         }
 
         if (!privateKey) {
-            console.error("❌ Error: Private key is required. Use --private-key or set PRIVATE_KEY");
-            console.error("Run with --help for usage information.");
+            console.error("❌ Error: Private key is required");
+            console.error("\n💡 You can either:");
+            console.error("   1. Set it globally: nla wallet:set --private-key <your-key>");
+            console.error("   2. Use for this command only: --private-key <your-key>");
+            console.error("   3. Set PRIVATE_KEY environment variable");
+            console.error("\nRun with --help for usage information.");
             process.exit(1);
         }
 
-        // Load deployment file
-        const resolvedDeploymentPath = findDeploymentFile(deploymentPath);
-        if (!resolvedDeploymentPath) {
-            console.error(`❌ Error: Deployment file not found: ${deploymentPath}`);
+        // Load deployment file (auto-detects current network if not specified)
+        let deployment;
+        try {
+            deployment = loadDeploymentWithDefaults(deploymentPath);
+        } catch (error) {
+            console.error(`❌ Error: ${(error as Error).message}`);
             console.error("Please deploy contracts first or specify correct path with --deployment");
-            console.error("\nSearched in:");
-            console.error(`  - ${resolve(deploymentPath)}`);
-            console.error(`  - ${resolve(process.cwd(), deploymentPath)}`);
-            console.error(`  - ${resolve(__dirname, "..", "deployments", "devnet.json")}`);
             process.exit(1);
         }
 
-        const deployment = JSON.parse(readFileSync(resolvedDeploymentPath, "utf-8"));
         const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
         const chain = getChainFromNetwork(deployment.network);
 
@@ -168,7 +141,7 @@ async function main() {
 
         // Check balance
         const balance = await walletClient.getBalance({ address: account.address });
-        console.log(`💰 ETH balance: ${parseFloat((balance / 10n ** 18n).toString()).toFixed(4)} ETH\n`);
+        console.log(`💰 ETH balance: ${parseFloat(formatEther(balance)).toFixed(4)} ETH\n`);
 
         if (balance === 0n) {
             console.error("❌ Error: Account has no ETH for gas. Please fund the account first.");
