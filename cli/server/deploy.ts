@@ -371,16 +371,6 @@ async function main() {
         console.log("\n🎯 Next steps:");
         console.log("1. Start the oracle:");
         console.log(`   nla start-oracle`);
-        console.log("\n2. Export your private key (use a test account private key):");
-        console.log(`   export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`);
-        console.log("\n3. Create an escrow:");
-        console.log(`   nla escrow:create \\`);
-        console.log(`     --demand "The sky is blue" \\`);
-        console.log(`     --amount 10 \\`);
-        console.log(`     --token ${addresses.mockERC20A} \\`);
-        console.log(`     --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \\`);
-        console.log(`     --arbitration-provider "OpenAI" \\`);
-        console.log(`     --arbitration-model "gpt-4o-mini"`);
 
     } catch (error) {
         console.error("❌ Deployment failed:", error);

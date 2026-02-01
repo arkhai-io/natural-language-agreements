@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync, createWriteStream, unlinkSync } from "fs";
 import { join } from "path";
+import { getCurrentEnvironment, setCurrentEnvironment } from "../utils.js";
 
 // Colors for console output
 const colors = {
@@ -70,6 +71,16 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}`);
     console.log(`${colors.blue}  Natural Language Agreement Oracle - Quick Setup${colors.reset}`);
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}\n`);
+
+    // Auto-switch to devnet environment
+    const currentEnv = getCurrentEnvironment();
+    if (currentEnv !== 'devnet') {
+        console.log(`${colors.yellow}🔄 Switching environment from ${currentEnv} to devnet...${colors.reset}`);
+        setCurrentEnvironment('devnet');
+        console.log(`${colors.green}✅ Switched to devnet${colors.reset}\n`);
+    } else {
+        console.log(`${colors.green}✅ Already on devnet environment${colors.reset}\n`);
+    }
 
     // Load .env file first
     loadEnvFile(envPath);

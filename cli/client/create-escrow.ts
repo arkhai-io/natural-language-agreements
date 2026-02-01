@@ -15,47 +15,11 @@ import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
 import {fixtures} from "alkahest-ts";
-import { getCurrentEnvironment } from "../commands/switch.js";
-import { getChainFromNetwork } from "../utils.js";
+import { getCurrentEnvironment, getChainFromNetwork, loadDeploymentWithDefaults } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Helper function to find deployment file
-function findDeploymentFile(deploymentPath: string, environment?: string): string | null {
-    // If no path provided, use current environment
-    if (!deploymentPath) {
-        const env = environment || getCurrentEnvironment();
-        deploymentPath = `./cli/deployments/${env}.json`;
-    }
-    
-    // Try the provided path first
-    if (existsSync(resolve(deploymentPath))) {
-        return resolve(deploymentPath);
-    }
-    
-    // Try relative to current working directory
-    const cwdPath = resolve(process.cwd(), deploymentPath);
-    if (existsSync(cwdPath)) {
-        return cwdPath;
-    }
-    
-    // Try relative to the CLI installation directory with current environment
-    const env = environment || getCurrentEnvironment();
-    const cliPath = resolve(__dirname, "..", "deployments", `${env}.json`);
-    if (existsSync(cliPath)) {
-        return cliPath;
-    }
-    
-    // Try in the project root (for local development)
-    const projectPath = resolve(__dirname, "..", "..", "cli", "deployments", `${env}.json`);
-    if (existsSync(projectPath)) {
-        return projectPath;
-    }
-    
-    return null;
-}
 
 // Helper function to display usage
 function displayHelp() {
@@ -141,7 +105,7 @@ async function main() {
         const tokenAddress = args.token;
         const oracleAddress = args.oracle;
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || `./cli/deployments/${getCurrentEnvironment()}.json`;
+        const deploymentPath = args.deployment;
         
         // Arbitration configuration with defaults
         const arbitrationProvider = args["arbitration-provider"] || "OpenAI";
@@ -184,19 +148,16 @@ Fulfillment: {{obligation}}`;
             process.exit(1);
         }
 
-        // Load deployment file
-        const resolvedDeploymentPath = findDeploymentFile(deploymentPath);
-        if (!resolvedDeploymentPath) {
-            console.error(`❌ Error: Deployment file not found: ${deploymentPath}`);
+        // Load deployment file (auto-detects current network if not specified)
+        let deployment;
+        try {
+            deployment = loadDeploymentWithDefaults(deploymentPath);
+        } catch (error) {
+            console.error(`❌ Error: ${(error as Error).message}`);
             console.error("Please deploy contracts first or specify correct path with --deployment");
-            console.error("\nSearched in:");
-            console.error(`  - ${resolve(deploymentPath)}`);
-            console.error(`  - ${resolve(process.cwd(), deploymentPath)}`);
-            console.error(`  - ${resolve(__dirname, "..", "deployments", "devnet.json")}`);
             process.exit(1);
         }
 
-        const deployment = JSON.parse(readFileSync(resolvedDeploymentPath, "utf-8"));
         const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
         const chain = getChainFromNetwork(deployment.network);
 
@@ -257,7 +218,7 @@ Fulfillment: {{obligation}}`;
         console.log("📋 Creating escrow\n");
 
         // Encode the demand with oracle arbiter
-        const arbiter = deployment.addresses.trustedOracleArbiter;
+        const arbiter = deployment.addresses.trustedOracleArbiter as `0x${string}`;
         const encodedDemand = client.arbiters.general.trustedOracle.encodeDemand({
             oracle: oracleAddress as `0x${string}`,
             data: llmClient.llm.encodeDemand({
@@ -266,7 +227,7 @@ Fulfillment: {{obligation}}`;
                 arbitrationPrompt,
                 demand: demand
             })
-        });
+        }) as `0x${string}`;
 
         // Create the escrow
         const { attested: escrow } = await client.erc20.escrow.nonTierable.permitAndCreate(
