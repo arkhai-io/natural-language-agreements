@@ -9,7 +9,7 @@ import { resolve } from "path";
 import { makeClient } from "alkahest-ts";
 import { fixtures } from "alkahest-ts";
 import { ProviderName } from "../../nla";
-
+import { contractAddresses } from "alkahest-ts";
 // Helper function to display usage
 function displayHelp() {
     console.log(`
@@ -174,8 +174,37 @@ async function main() {
             transport: http(rpcUrl),
         }).extend(publicActions) as any;
 
+        // Merge deployment addresses with default contract addresses
+        // Use contractAddresses as fallback for any missing addresses
+        let finalAddresses = deploymentAddresses || {};
+        
+        if (!deploymentAddresses || Object.keys(deploymentAddresses).length === 0) {
+            // If no deployment addresses, try to use default contract addresses from the network
+            const chainId = foundry.id; // You may need to detect this from the RPC
+            if (contractAddresses[chainId]) {
+                finalAddresses = { ...contractAddresses[chainId] };
+                console.log(`📋 Using default contract addresses for chain ${chainId}\n`);
+            } else if (easContract) {
+                finalAddresses = { eas: easContract };
+            }
+        } else {
+            // Merge with contract addresses to fill in any missing values
+            const chainId = foundry.id;
+            if (contractAddresses[chainId]) {
+                // Start with default addresses
+                finalAddresses = { ...contractAddresses[chainId] };
+                
+                // Override with deployment addresses, but only if they're not empty strings
+                for (const [key, value] of Object.entries(deploymentAddresses)) {
+                    if (value && value !== "") {
+                        finalAddresses[key] = value;
+                    }
+                }
+            }
+        }
+
         // Create alkahest client
-        const client = makeClient(walletClient, deploymentAddresses || { eas: easContract });
+        const client = makeClient(walletClient, finalAddresses);
         
         console.log(`✅ Oracle initialized with address: ${account.address}\n`);
 

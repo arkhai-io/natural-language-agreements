@@ -9,7 +9,7 @@
 import { parseArgs } from "util";
 import { createWalletClient, http, publicActions, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet, sepolia, foundry } from "viem/chains";
+import { mainnet, sepolia, baseSepolia, foundry } from "viem/chains";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { fixtures, contracts } from "alkahest-ts";
@@ -23,7 +23,7 @@ Usage:
   bun deploy.ts [options]
 
 Options:
-  --network <name>             Network to deploy to: mainnet, sepolia, localhost (required)
+  --network <name>             Network to deploy to: mainnet, sepolia, base-sepolia, localhost (required)
   --rpc-url <url>              Custom RPC URL (overrides network default)
   --private-key <key>          Deployer's private key (required)
   --output <path>              Output file for deployment addresses (default: ./cli/deployments/<network>.json)
@@ -36,6 +36,7 @@ Environment Variables (alternative to CLI options):
 Networks:
   mainnet                      Ethereum Mainnet
   sepolia                      Ethereum Sepolia Testnet
+  base-sepolia                 Base Sepolia Testnet
   localhost                    Local development (Anvil/Hardhat)
 
 Examples:
@@ -75,11 +76,13 @@ function getChain(network: string) {
             return mainnet;
         case "sepolia":
             return sepolia;
+        case "base-sepolia":
+            return baseSepolia;
         case "localhost":
         case "local":
             return foundry;
         default:
-            throw new Error(`Unknown network: ${network}. Use mainnet, sepolia, or localhost`);
+            throw new Error(`Unknown network: ${network}. Use mainnet, sepolia, base-sepolia, or localhost`);
     }
 }
 

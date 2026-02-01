@@ -86,19 +86,20 @@ export function runSwitchCommand(env?: string) {
         const current = getCurrentEnvironment();
         console.log(`${colors.blue}Current environment:${colors.reset} ${colors.green}${current}${colors.reset}\n`);
         console.log('Available environments:');
-        console.log('  • devnet   (local Anvil blockchain)');
-        console.log('  • sepolia  (Ethereum Sepolia testnet)');
-        console.log('  • mainnet  (Ethereum mainnet)\n');
+        console.log('  • devnet       (local Anvil blockchain)');
+        console.log('  • sepolia      (Ethereum Sepolia testnet)');
+        console.log('  • base-sepolia (Base Sepolia testnet)');
+        console.log('  • mainnet      (Ethereum mainnet)\n');
         console.log(`${colors.yellow}Usage:${colors.reset} nla switch <environment>`);
         console.log(`${colors.yellow}Example:${colors.reset} nla switch sepolia\n`);
         return;
     }
 
     // Validate environment
-    const validEnvs = ['devnet', 'sepolia', 'mainnet'];
+    const validEnvs = ['devnet', 'sepolia', 'base-sepolia', 'mainnet'];
     if (!validEnvs.includes(env)) {
         console.error(`${colors.red}❌ Invalid environment: ${env}${colors.reset}`);
-        console.log('Valid environments: devnet, sepolia, mainnet\n');
+        console.log('Valid environments: devnet, sepolia, base-sepolia, mainnet\n');
         process.exit(1);
     }
 
@@ -120,6 +121,9 @@ export function runSwitchCommand(env?: string) {
     } else if (env === 'sepolia') {
         console.log('📝 Using Ethereum Sepolia testnet');
         console.log('   Make sure you have deployed contracts and updated sepolia.json\n');
+    } else if (env === 'base-sepolia') {
+        console.log('📝 Using Base Sepolia testnet');
+        console.log('   Make sure you have deployed contracts and updated base-sepolia.json\n');
     } else if (env === 'mainnet') {
         console.log('📝 Using Ethereum mainnet');
         console.log(`   ${colors.yellow}⚠️  WARNING: This is production! Use with caution.${colors.reset}\n`);

@@ -2,7 +2,7 @@
  * Shared utilities for NLA CLI
  */
 
-import { foundry, sepolia, mainnet } from "viem/chains";
+import { foundry, sepolia, mainnet, baseSepolia } from "viem/chains";
 import type { Chain } from "viem/chains";
 
 /**
@@ -15,6 +15,8 @@ export function getChainFromNetwork(network: string): Chain {
             return foundry;
         case "sepolia":
             return sepolia;
+        case "base-sepolia":
+            return baseSepolia;
         case "mainnet":
             return mainnet;
         default:

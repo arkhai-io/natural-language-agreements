@@ -29,7 +29,7 @@ Commands:
   deploy           Deploy contracts to blockchain
   start-oracle     Start the oracle service
   stop             Stop all services (Anvil + Oracle)
-  switch [env]     Switch between environments (devnet, sepolia, mainnet)
+  switch [env]     Switch between environments (devnet, sepolia, base-sepolia, mainnet)
   network          Show current network/environment
   escrow:create    Create a new escrow with natural language demand
   escrow:fulfill   Fulfill an existing escrow
