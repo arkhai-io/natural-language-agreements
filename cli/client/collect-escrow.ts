@@ -6,7 +6,7 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions } from "viem";
+import { createWalletClient, http, publicActions, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
@@ -85,7 +85,7 @@ async function main() {
         const escrowUid = args["escrow-uid"];
         const fulfillmentUid = args["fulfillment-uid"];
         const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
-        const deploymentPath = args.deployment || "./cli/deployments/devnet.json";
+        const deploymentPath = args.deployment;
 
         // Validate required parameters
         if (!escrowUid) {
@@ -137,7 +137,7 @@ async function main() {
 
         // Check balance
         const balance = await walletClient.getBalance({ address: account.address });
-        console.log(`💰 ETH balance: ${parseFloat((balance / 10n ** 18n).toString()).toFixed(4)} ETH\n`);
+        console.log(`💰 ETH balance: ${parseFloat(formatEther(balance)).toFixed(4)} ETH\n`);
 
         if (balance === 0n) {
             console.error("❌ Error: Account has no ETH for gas. Please fund the account first.");

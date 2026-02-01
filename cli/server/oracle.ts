@@ -2,7 +2,6 @@
 import { parseArgs } from "util";
 import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { foundry } from "viem/chains";
 import { makeLLMClient } from "../..";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
@@ -15,7 +14,8 @@ import {
     getCurrentEnvironment, 
     getDeploymentPath, 
     loadEnvFile,
-    loadDeploymentWithDefaults
+    loadDeploymentWithDefaults,
+    getChainFromNetwork
 } from "../utils.js";
 
 // Get the directory name for ESM modules
@@ -187,10 +187,11 @@ async function main() {
         console.log(`  ⏱️  Polling Interval: ${pollingInterval}ms\n`);
 
         // Create wallet client
+        const chain = getChainFromNetwork(deployment.network);
         const account = privateKeyToAccount(privateKey as `0x${string}`);
         const walletClient = createWalletClient({
             account,
-            chain: foundry,
+            chain,
             transport: http(deployment.rpcUrl),
         }).extend(publicActions) as any;
 
@@ -256,12 +257,25 @@ async function main() {
                     console.log(`   Obligation: "${obligationItem}"`);
 
                     const trustedOracleDemandData = client.arbiters.general.trustedOracle.decodeDemand(demand);
+                    console.log(`   DEBUG - trustedOracleDemandData:`, trustedOracleDemandData);
+                    
                     const nlaDemandData = llmClient.llm.decodeDemand(trustedOracleDemandData.data);
+                    console.log(`   DEBUG - nlaDemandData:`, nlaDemandData);
+                    
                     console.log(`   Demand: "${nlaDemandData.demand}"`);
+                    console.log(`   Provider: ${nlaDemandData.arbitrationProvider}`);
                     console.log(`   Model: ${nlaDemandData.arbitrationModel}`);
 
+                    // Validate the demand data before proceeding
+                    if (!nlaDemandData.demand || !nlaDemandData.arbitrationModel || nlaDemandData.arbitrationModel.includes('\u0000')) {
+                        console.error(`   ❌ Invalid demand data - contains null bytes or empty fields`);
+                        console.error(`   This usually means the demand was encoded incorrectly`);
+                        console.error(`   Skipping this attestation (throwing error to avoid on-chain recording)...\n`);
+                        throw new Error('Invalid demand data - skipping attestation');
+                    }
+
                     // Perform arbitration using LLM
-                    console.log(`   🤔 Arbitrating with AI...`);
+                    console.log(`   🤔 Arbitrating with ${nlaDemandData.arbitrationProvider}...`);
                     const result = await llmClient.llm.arbitrate(
                         nlaDemandData,
                         obligationItem
@@ -271,14 +285,21 @@ async function main() {
                     return result;
                 } catch (error) {
                     console.error(`   ❌ Error during arbitration:`, error);
-                    throw error;
+                    console.error(`   Continuing to listen for new requests...\n`);
+                    return false; // Return false instead of throwing to keep oracle running
                 }
             },
             {
                 onAfterArbitrate: async (decision: any) => {
-                    console.log(`   📝 Arbitration decision recorded on-chain`);
-                    console.log(`   Decision UID: ${decision.attestation.uid}`);
-                    console.log(`   Result: ${decision.decision ? "✅ Fulfilled" : "❌ Not Fulfilled"}\n`);
+                    try {
+                        console.log(`   📝 Arbitration decision recorded on-chain`);
+                        console.log(`   Decision UID: ${decision.attestation.uid}`);
+                        console.log(`   Result: ${decision.decision ? "✅ Fulfilled" : "❌ Not Fulfilled"}\n`);
+                    } catch (error: any) {
+                        console.error(`   ⚠️  Failed to record arbitration on-chain:`, error.message);
+                        console.error(`   This may be due to transaction conflicts or gas issues`);
+                        console.error(`   Continuing to listen for new requests...\n`);
+                    }
                 },
                 pollingInterval,
             },

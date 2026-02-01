@@ -167,27 +167,21 @@ export function loadDeploymentWithDefaults(deploymentFilePath?: string): {
     const content = readFileSync(actualPath, "utf-8");
     const deployment = JSON.parse(content);
     
-    let finalAddresses: Record<string, string> = deployment.addresses || {};
-    const chainId = deployment.chainId;
+    let finalAddresses: Record<string, string> = {};
+    
+    // Start with default addresses from contractAddresses if available
+    // contractAddresses is indexed by chain name (e.g., "Base Sepolia", "foundry")
+    const chainName = deployment.network;
+    if (contractAddresses[chainName]) {
+        finalAddresses = { ...contractAddresses[chainName] };
+    }
 
-    // If deployment addresses exist, merge with defaults
+    // Override with deployment addresses, but only if they're not empty strings
     if (deployment.addresses && Object.keys(deployment.addresses).length > 0) {
-        // Check if we have default addresses for this chain
-        if (contractAddresses[chainId]) {
-            // Start with default addresses
-            finalAddresses = { ...contractAddresses[chainId] };
-            
-            // Override with deployment addresses, but only if they're not empty strings
-            for (const [key, value] of Object.entries(deployment.addresses)) {
-                if (value && value !== "") {
-                    finalAddresses[key] = value as string;
-                }
+        for (const [key, value] of Object.entries(deployment.addresses)) {
+            if (value && value !== "") {
+                finalAddresses[key] = value as string;
             }
-        }
-    } else {
-        // If no deployment addresses at all, use defaults if available
-        if (contractAddresses[chainId]) {
-            finalAddresses = { ...contractAddresses[chainId] };
         }
     }
 
