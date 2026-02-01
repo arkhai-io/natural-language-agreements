@@ -12,6 +12,7 @@ import { contracts } from "alkahest-ts";
 import { runDevCommand } from "./commands/dev.js";
 import { runStopCommand } from "./commands/stop.js";
 import { runSwitchCommand } from "./commands/switch.js";
+import { setWallet, showWallet, clearWallet } from "./commands/wallet.js";
 
 // Get the directory name for ESM modules (compatible with both Node and Bun)
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +32,9 @@ Commands:
   stop             Stop all services (Anvil + Oracle)
   switch [env]     Switch between environments (devnet, sepolia, base-sepolia, mainnet)
   network          Show current network/environment
+  wallet:set       Set wallet private key
+  wallet:show      Show current wallet address
+  wallet:clear     Clear wallet from config
   escrow:create    Create a new escrow with natural language demand
   escrow:fulfill   Fulfill an existing escrow
   escrow:collect   Collect an approved escrow
@@ -179,6 +183,27 @@ async function main() {
         if (command === "network") {
             // Show current network (same as switch with no args)
             runSwitchCommand();
+            return;
+        }
+
+        // Handle wallet commands
+        if (command === "wallet:set") {
+            const privateKey = args["private-key"] as string | undefined;
+            if (!privateKey) {
+                console.error("❌ Missing required option: --private-key");
+                process.exit(1);
+            }
+            await setWallet(privateKey);
+            return;
+        }
+
+        if (command === "wallet:show") {
+            await showWallet();
+            return;
+        }
+
+        if (command === "wallet:clear") {
+            await clearWallet();
             return;
         }
 

@@ -14,7 +14,7 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
-import { getChainFromNetwork, loadDeploymentWithDefaults } from "../utils.js";
+import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -90,7 +90,7 @@ async function main() {
         const escrowUid = args["escrow-uid"];
         const fulfillment = args.fulfillment;
         const oracleAddress = args.oracle;
-        const privateKey = args["private-key"] || process.env.PRIVATE_KEY;
+        const privateKey = args["private-key"] || getPrivateKey();
         const deploymentPath = args.deployment ;
 
         // Validate required parameters
@@ -113,8 +113,12 @@ async function main() {
         }
 
         if (!privateKey) {
-            console.error("❌ Error: Private key is required. Use --private-key or set PRIVATE_KEY");
-            console.error("Run with --help for usage information.");
+            console.error("❌ Error: Private key is required");
+            console.error("\n💡 You can either:");
+            console.error("   1. Set it globally: nla wallet:set --private-key <your-key>");
+            console.error("   2. Use for this command only: --private-key <your-key>");
+            console.error("   3. Set PRIVATE_KEY environment variable");
+            console.error("\nRun with --help for usage information.");
             process.exit(1);
         }
 

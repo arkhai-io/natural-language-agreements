@@ -116,6 +116,60 @@ export function setCurrentEnvironment(env: string): void {
 }
 
 /**
+ * Get private key from config or environment
+ */
+export function getPrivateKey(): string | undefined {
+    // First check environment variable
+    if (process.env.PRIVATE_KEY) {
+        return process.env.PRIVATE_KEY;
+    }
+    
+    // Then check config file
+    const configPath = join(getNLAConfigDir(), 'config.json');
+    if (!existsSync(configPath)) {
+        return undefined;
+    }
+    
+    try {
+        const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+        return config.privateKey;
+    } catch (e) {
+        return undefined;
+    }
+}
+
+/**
+ * Set private key in config
+ */
+export function setPrivateKey(privateKey: string): void {
+    const configPath = join(getNLAConfigDir(), 'config.json');
+    const config = existsSync(configPath) 
+        ? JSON.parse(readFileSync(configPath, 'utf-8'))
+        : {};
+    
+    config.privateKey = privateKey;
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+}
+
+/**
+ * Clear private key from config
+ */
+export function clearPrivateKey(): void {
+    const configPath = join(getNLAConfigDir(), 'config.json');
+    if (!existsSync(configPath)) {
+        return;
+    }
+    
+    try {
+        const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+        delete config.privateKey;
+        writeFileSync(configPath, JSON.stringify(config, null, 2));
+    } catch (e) {
+        // Ignore errors
+    }
+}
+
+/**
  * Get deployment path for environment
  */
 export function getDeploymentPath(cliDir: string, env?: string): string {

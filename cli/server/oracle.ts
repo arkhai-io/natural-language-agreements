@@ -15,7 +15,8 @@ import {
     getDeploymentPath, 
     loadEnvFile,
     loadDeploymentWithDefaults,
-    getChainFromNetwork
+    getChainFromNetwork,
+    getPrivateKey
 } from "../utils.js";
 
 // Get the directory name for ESM modules
@@ -131,7 +132,7 @@ async function main() {
         const deployment = loadDeploymentWithDefaults(deploymentFile);
         console.log(`✅ Loaded deployment (${deployment.network})\n`);
 
-        const privateKey = args["private-key"] || process.env.ORACLE_PRIVATE_KEY;
+        const privateKey = args["private-key"] || getPrivateKey();
         const openaiApiKey = args["openai-api-key"] || process.env.OPENAI_API_KEY;
         const anthropicApiKey = args["anthropic-api-key"] || process.env.ANTHROPIC_API_KEY;
         const openrouterApiKey = args["openrouter-api-key"] || process.env.OPENROUTER_API_KEY;
@@ -149,8 +150,12 @@ async function main() {
 
         if (!privateKey) {
             console.error("❌ Error: Private key is required.");
-            console.error("   Set ORACLE_PRIVATE_KEY in .env file or use --private-key");
-            console.error("Run with --help for usage information.");
+            console.error("\n💡 You can either:");
+            console.error("   1. Set it globally: nla wallet:set --private-key <your-key>");
+            console.error("   2. Use for this command only: --private-key <your-key>");
+            console.error("   3. Set ORACLE_PRIVATE_KEY in .env file");
+            console.error("   4. Set PRIVATE_KEY environment variable");
+            console.error("\nRun with --help for usage information.");
             process.exit(1);
         }
 
