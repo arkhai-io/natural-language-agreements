@@ -135,6 +135,7 @@ function parseCliArgs() {
             "arbitration-prompt": { type: "string" },
             "env": { type: "string" },
             "environment": { type: "string" },
+            "help": { type: "boolean", short: "h" },
         },
         strict: command !== "switch" && command !== "network", // Allow positional args for switch command
         allowPositionals: command === "switch" || command === "network",

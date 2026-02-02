@@ -33,6 +33,7 @@ Usage:
 
 Options:
   --private-key <key>          Private key of the oracle operator (optional, loaded from .env)
+  --rpc-url <url>              RPC URL to connect to (optional, overrides deployment file)
   --openai-api-key <key>       OpenAI API key (optional, loaded from .env)
   --anthropic-api-key <key>    Anthropic API key (optional, loaded from .env)
   --openrouter-api-key <key>   OpenRouter API key (optional, loaded from .env)
@@ -62,6 +63,9 @@ Examples:
   # Using specific deployment file
   bun oracle.ts --deployment ./deployments/sepolia.json
 
+  # Using custom RPC URL
+  bun oracle.ts --rpc-url https://eth-mainnet.g.alchemy.com/v2/YOUR-KEY
+
   # Mix of .env and command-line parameters
   bun oracle.ts --openai-api-key sk-... --env .env.local
 
@@ -80,6 +84,7 @@ function parseCliArgs() {
         args: process.argv.slice(2),
         options: {
             "private-key": { type: "string" },
+            "rpc-url": { type: "string" },
             "openai-api-key": { type: "string" },
             "anthropic-api-key": { type: "string" },
             "openrouter-api-key": { type: "string" },
@@ -133,6 +138,7 @@ async function main() {
         console.log(`✅ Loaded deployment (${deployment.network})\n`);
 
         const privateKey = args["private-key"] || getPrivateKey();
+        const rpcUrl = args["rpc-url"] || deployment.rpcUrl;
         const openaiApiKey = args["openai-api-key"] || process.env.OPENAI_API_KEY;
         const anthropicApiKey = args["anthropic-api-key"] || process.env.ANTHROPIC_API_KEY;
         const openrouterApiKey = args["openrouter-api-key"] || process.env.OPENROUTER_API_KEY;
@@ -140,10 +146,12 @@ async function main() {
         const pollingInterval = parseInt(args["polling-interval"] || "5000");
 
         // Validate required parameters
-        if (!deployment?.rpcUrl) {
-            console.error("❌ Error: RPC URL not found in deployment file.");
-            console.error("   Current environment:", getCurrentEnvironment());
-            console.error("   Make sure the deployment file exists for your current network.");
+        if (!rpcUrl) {
+            console.error("❌ Error: RPC URL not found.");
+            console.error("   Please either:");
+            console.error("   1. Use --rpc-url <url>");
+            console.error("   2. Use a deployment file with rpcUrl set");
+            console.error("   3. Set RPC_URL environment variable");
             console.error("Run with --help for usage information.");
             process.exit(1);
         }
@@ -171,7 +179,7 @@ async function main() {
 
         console.log("🚀 Starting Natural Language Agreement Oracle...\n");
         console.log("Configuration:");
-        console.log(`  📡 RPC URL: ${deployment.rpcUrl}`);
+        console.log(`  📡 RPC URL: ${rpcUrl}`);
         console.log(`  🔑 Oracle Key: ${privateKey.slice(0, 6)}...${privateKey.slice(-4)}`);
         
         // Show available providers
@@ -196,7 +204,7 @@ async function main() {
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(deployment.rpcUrl),
+            transport: http(rpcUrl),
         }).extend(publicActions) as any;
 
 
