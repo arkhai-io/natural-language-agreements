@@ -5,9 +5,14 @@
 import { foundry, sepolia, mainnet, baseSepolia } from "viem/chains";
 import type { Chain } from "viem/chains";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
 import { homedir } from "os";
 import { contractAddresses } from "alkahest-ts";
+import { fileURLToPath } from "url";
+
+// Get the directory of this utils file (dist/cli or cli/)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Load .env file and set environment variables
@@ -171,30 +176,24 @@ export function clearPrivateKey(): void {
 
 /**
  * Get deployment path for environment
+ * Automatically looks in the CLI directory where utils.ts is located
+ * @param env - The environment name (devnet, sepolia, etc.)
  */
-export function getDeploymentPath(cliDir: string, env?: string): string {
+export function getDeploymentPath(env?: string): string {
     const environment = env || getCurrentEnvironment();
     const filename = `${environment}.json`;
     
-    // Try multiple locations
-    const paths = [
-        join(cliDir, 'deployments', filename),  // dist/cli/deployments/
-        join(process.cwd(), 'cli', 'deployments', filename),  // Project root
-    ];
+    // When deployed via npm, utils.js will be in dist/cli/
+    // and deployment files will be in dist/cli/deployments/
+    const deploymentPath = join(__dirname, 'deployments', filename);
     
-    for (const path of paths) {
-        if (existsSync(path)) {
-            return path;
-        }
-    }
-    
-    // Return the first path as default (even if it doesn't exist yet)
-    return paths[0];
+    return deploymentPath;
 }
 
 /**
  * Load deployment file and fill empty addresses with defaults from contractAddresses
  * If deploymentFilePath doesn't exist, tries to load deployment for current network
+ * @param deploymentFilePath - Optional path to deployment file
  */
 export function loadDeploymentWithDefaults(deploymentFilePath?: string): {
     network: string;
@@ -207,12 +206,12 @@ export function loadDeploymentWithDefaults(deploymentFilePath?: string): {
     // If no path provided or path doesn't exist, try current network
     if (!actualPath || !existsSync(actualPath)) {
         const currentEnv = getCurrentEnvironment();
-        const autoPath = getDeploymentPath(process.cwd(), currentEnv);
+        const autoPath = getDeploymentPath(currentEnv);
         
         if (existsSync(autoPath)) {
             actualPath = autoPath;
         } else if (!actualPath) {
-            throw new Error(`No deployment file found for current environment: ${currentEnv}`);
+            throw new Error(`No deployment file found for current environment: ${currentEnv}. Try running from the project directory or use --deployment <file>`);
         } else {
             throw new Error(`Deployment file not found: ${actualPath}`);
         }

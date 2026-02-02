@@ -38,7 +38,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && chmod +x dist/cli/index.js",
+    "build": "tsc --project tsconfig.build.json && chmod +x dist/cli/index.js && cp -r cli/deployments dist/cli/",
     "prepublishOnly": "npm run build",
     "patch": "npm version patch",
     "minor": "npm version minor",
