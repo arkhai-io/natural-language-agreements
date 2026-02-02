@@ -43,7 +43,7 @@ Options:
   --help, -h                   Display this help message
 
 Environment Variables (from .env file or environment):
-  ORACLE_PRIVATE_KEY           Private key of the oracle operator
+  PRIVATE_KEY                  Private key of the oracle operator
   OPENAI_API_KEY               OpenAI API key
   ANTHROPIC_API_KEY            Anthropic API key
   OPENROUTER_API_KEY           OpenRouter API key
@@ -66,7 +66,7 @@ Examples:
   bun oracle.ts --openai-api-key sk-... --env .env.local
 
 Example .env file:
-  ORACLE_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+  PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
   OPENAI_API_KEY=sk-...
   ANTHROPIC_API_KEY=sk-ant-...
   OPENROUTER_API_KEY=sk-or-...
@@ -153,8 +153,7 @@ async function main() {
             console.error("\n💡 You can either:");
             console.error("   1. Set it globally: nla wallet:set --private-key <your-key>");
             console.error("   2. Use for this command only: --private-key <your-key>");
-            console.error("   3. Set ORACLE_PRIVATE_KEY in .env file");
-            console.error("   4. Set PRIVATE_KEY environment variable");
+            console.error("   3. Set PRIVATE_KEY environment variable");
             console.error("\nRun with --help for usage information.");
             process.exit(1);
         }

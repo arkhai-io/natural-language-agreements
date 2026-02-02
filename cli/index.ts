@@ -164,7 +164,7 @@ async function main() {
 
         // Handle dev and stop commands
         if (command === "dev") {
-            await runDevCommand(__dirname, args.env as string | undefined);
+            await runDevCommand(__dirname, args.env as string | undefined, args["private-key"] as string | undefined);
             return;
         }
         
