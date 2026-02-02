@@ -135,6 +135,7 @@ function parseCliArgs() {
             "arbitration-prompt": { type: "string" },
             "env": { type: "string" },
             "environment": { type: "string" },
+            "help": { type: "boolean", short: "h" },
         },
         strict: command !== "switch" && command !== "network", // Allow positional args for switch command
         allowPositionals: command === "switch" || command === "network",
@@ -164,7 +165,7 @@ async function main() {
 
         // Handle dev and stop commands
         if (command === "dev") {
-            await runDevCommand(__dirname, args.env as string | undefined);
+            await runDevCommand(__dirname, args.env as string | undefined, args["private-key"] as string | undefined);
             return;
         }
         

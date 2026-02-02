@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync, createWriteStream, unlinkSync } from "fs";
 import { join } from "path";
-import { getCurrentEnvironment, setCurrentEnvironment } from "../utils.js";
+import { getCurrentEnvironment, setCurrentEnvironment, getPrivateKey } from "../utils.js";
 
 // Colors for console output
 const colors = {
@@ -67,7 +67,7 @@ function isPortInUse(port: number): boolean {
 }
 
 // Dev command - Start complete development environment
-export async function runDevCommand(cliDir: string, envPath?: string) {
+export async function runDevCommand(cliDir: string, envPath?: string, cliPrivateKey?: string) {
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}`);
     console.log(`${colors.blue}  Natural Language Agreement Oracle - Quick Setup${colors.reset}`);
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}\n`);
@@ -85,6 +85,9 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     // Load .env file first
     loadEnvFile(envPath);
     console.log('');
+
+    // Get private key from CLI arg, config, or env (same pattern as other commands)
+    const privateKey = cliPrivateKey || getPrivateKey();
 
     // Check prerequisites
     console.log(`${colors.blue}📋 Checking prerequisites...${colors.reset}\n`);
@@ -166,7 +169,11 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     // Deploy contracts
     console.log(`\n${colors.blue}📝 Deploying contracts...${colors.reset}\n`);
     const deployScript = join(cliDir, 'server', 'deploy.js');
-    const deployResult = spawnSync('bun', ['run', deployScript, '--network', 'localhost', '--rpc-url', 'http://localhost:8545'], {
+    const deployArgs = ['run', deployScript, '--network', 'localhost', '--rpc-url', 'http://localhost:8545'];
+    if (privateKey) {
+        deployArgs.push('--private-key', privateKey);
+    }
+    const deployResult = spawnSync('bun', deployArgs, {
         stdio: 'inherit',
         cwd: process.cwd()
     });
@@ -185,7 +192,12 @@ export async function runDevCommand(cliDir: string, envPath?: string) {
     const distPath = join(cliDir, 'deployments', 'devnet.json');
     const deploymentFile = existsSync(sourcePath) ? sourcePath : distPath;
     
-    const oracleProcess = spawn('bun', ['run', oracleScript, '--deployment', deploymentFile], {
+    const oracleArgs = ['run', oracleScript, '--deployment', deploymentFile];
+    if (privateKey) {
+        oracleArgs.push('--private-key', privateKey);
+    }
+    
+    const oracleProcess = spawn('bun', oracleArgs, {
         stdio: 'inherit',
         cwd: process.cwd()
     });

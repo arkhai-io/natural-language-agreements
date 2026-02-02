@@ -159,7 +159,7 @@ nla start-oracle mainnet      # Start oracle for mainnet
 
 Starts the oracle service that listens for arbitration requests. Requires:
 - `OPENAI_API_KEY` environment variable
-- `ORACLE_PRIVATE_KEY` environment variable (defaults to Anvil account #1)
+- `PRIVATE_KEY` environment variable (defaults to Anvil account #1)
 - Deployment file at `cli/deployments/{network}.json`
 
 #### Stop Services
