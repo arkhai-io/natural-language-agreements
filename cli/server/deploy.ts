@@ -13,6 +13,7 @@ import { mainnet, sepolia, baseSepolia, foundry } from "viem/chains";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { fixtures, contracts } from "alkahest-ts";
+import { getPrivateKey } from "../utils.js";
 
 // Helper function to display usage
 function displayHelp() {
@@ -30,7 +31,7 @@ Options:
   --help, -h                   Display this help message
 
 Environment Variables (alternative to CLI options):
-  DEPLOYER_PRIVATE_KEY         Deployer's private key
+  PRIVATE_KEY                  Deployer's private key
   RPC_URL                      Custom RPC URL
 
 Networks:
@@ -47,7 +48,7 @@ Examples:
   bun deploy.ts --network sepolia --private-key 0x... --rpc-url https://sepolia.infura.io/v3/YOUR-KEY
 
   # Using environment variables
-  export DEPLOYER_PRIVATE_KEY=0x...
+  export PRIVATE_KEY=0x...
   bun deploy.ts --network localhost
 `);
 }
@@ -98,7 +99,7 @@ async function main() {
 
         // Get configuration
         const network = args.network;
-        const privateKey = args["private-key"] || process.env.DEPLOYER_PRIVATE_KEY;
+        const privateKey = args["private-key"] || getPrivateKey();
         let rpcUrl = args["rpc-url"] || process.env.RPC_URL;
 
         // Validate required parameters
@@ -109,8 +110,12 @@ async function main() {
         }
 
         if (!privateKey) {
-            console.error("❌ Error: Private key is required. Use --private-key or set DEPLOYER_PRIVATE_KEY");
-            console.error("Run with --help for usage information.");
+            console.error("❌ Error: Private key is required.");
+            console.error("\n💡 You can either:");
+            console.error("   1. Set it globally: nla wallet:set --private-key <your-key>");
+            console.error("   2. Use for this command only: --private-key <your-key>");
+            console.error("   3. Set PRIVATE_KEY environment variable");
+            console.error("\nRun with --help for usage information.");
             process.exit(1);
         }
 
