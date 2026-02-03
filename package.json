@@ -53,7 +53,8 @@
     "stop": "bun run cli/index.ts stop",
     "escrow:create": "bun run cli/index.ts escrow:create",
     "escrow:fulfill": "bun run cli/index.ts escrow:fulfill",
-    "escrow:collect": "bun run cli/index.ts escrow:collect"
+    "escrow:collect": "bun run cli/index.ts escrow:collect",
+    "escrow:status": "bun run cli/index.ts escrow:status"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

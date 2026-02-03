@@ -1,99 +1,220 @@
 # natural-language-agreements
 
+Natural Language Agreement Oracle - Create and manage blockchain escrows using natural language demands powered by AI.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [CLI Commands](#cli-commands)
+- [LLM Providers](#llm-providers)
+- [Deployment](#deployment-to-other-networks)
+- [Examples](#examples)
+
 ## Prerequisites
 
-- [Bun](https://bun.sh) - Fast all-in-one JavaScript runtime
-- [Foundry](https://book.getfoundry.sh/getting-started/installation) - Ethereum development toolkit (for Anvil)
+- [Node.js](https://nodejs.org/) >= 18.0.0 (or [Bun](https://bun.sh))
+- [Foundry](https://book.getfoundry.sh/getting-started/installation) - Ethereum development toolkit (includes Anvil)
+- API key for at least one LLM provider (OpenAI, Anthropic, or OpenRouter)
 
-### Setup Instructions
+## Installation
 
-1. **Clone the repository:**
+### Option 1: Install from npm (Recommended)
+
+Install the `nla` CLI globally:
 
 ```bash
-# Navigate to your projects directory
-cd ~/Desktop  # or your preferred location
-
-# Clone this repository
-git clone https://github.com/arkhai-io/natural-language-agreements.git
-cd natural-language-agreements
+npm install -g nla
 ```
 
-2. **Install dependencies:**
+Verify installation:
 
 ```bash
-bun install
-```
-
-3. **Install the `nla` CLI globally (optional but recommended):**
-
-```bash
-# Link the CLI to make it available globally
-bun link
-
-# Now you can use 'nla' from anywhere!
 nla help
 ```
 
-> **Note:** If you don't install globally, you can still use the CLI with `bun run cli/index.ts` instead of `nla`.
+### Option 2: Install from source
+
+```bash
+# Clone the repository
+git clone https://github.com/arkhai-io/natural-language-agreements.git
+cd natural-language-agreements
+
+# Install dependencies
+bun install  # or: npm install
+
+# Link the CLI globally
+bun link     # or: npm link
+
+# Verify installation
+nla help
+```
 
 ## Quick Start
 
-### Option 1: Automated Setup (Easiest - 1 command!)
+### 1. Configure API Keys
 
-Set your OpenAI API key and run everything:
+Create a `.env` file or export environment variables:
 
 ```bash
-export OPENAI_API_KEY=sk-your-key-here
+# Required: At least one LLM provider
+export OPENAI_API_KEY=sk-your-openai-key
+# or
+export ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+# or
+export OPENROUTER_API_KEY=sk-or-your-openrouter-key
+
+# Optional: Private key for deploying/signing transactions
+export PRIVATE_KEY=0x...
+```
+
+### 2. Start Development Environment
+
+Run the all-in-one setup command:
+
+```bash
 nla dev
 ```
 
-This will:
-- ✅ Check all prerequisites
-- ✅ Start Anvil (local blockchain)
-- ✅ Deploy all contracts
-- ✅ Deploy and distribute mock ERC20 tokens
-- ✅ Start the oracle
-- ✅ Ready to test!
+This automatically:
+- ✅ Starts Anvil (local blockchain)
+- ✅ Deploys all contracts
+- ✅ Creates mock ERC20 tokens
+- ✅ Starts the oracle listener
+- ✅ Displays contract addresses
 
-To stop everything:
+### 3. Create Your First Escrow
+
+```bash
+nla escrow:create \
+  --demand "The sky is blue" \
+  --amount 10 \
+  --token 0xa513e6e4b8f2a923d98304ec87f64353c4d5c853 \
+  --oracle 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+### 4. Stop Services
+
 ```bash
 nla stop
 ```
 
-> **Note:** If you haven't installed the CLI globally yet, run `bun link` first, or use `bun run cli/index.ts dev` instead.
+## CLI Commands
 
-### Option 2: Manual Setup (Step by Step)
+### Core Commands
 
-#### 1. Start Local Blockchain
+| Command | Description |
+|---------|-------------|
+| `nla dev` | Start complete local development environment |
+| `nla deploy [network] [rpc]` | Deploy contracts to a network |
+| `nla start-oracle [options]` | Start the oracle service |
+| `nla stop` | Stop all running services |
+| `nla help` | Display help information |
+
+### Wallet Management
+
+| Command | Description |
+|---------|-------------|
+| `nla wallet:set --private-key <key>` | Save private key to config |
+| `nla wallet:show` | Show current wallet address |
+| `nla wallet:clear` | Remove private key from config |
+
+### Escrow Operations
+
+| Command | Description |
+|---------|-------------|
+| `nla escrow:create [options]` | Create a new escrow |
+| `nla escrow:fulfill [options]` | Submit fulfillment for an escrow |
+| `nla escrow:collect [options]` | Collect approved escrow funds |
+| `nla escrow:status --escrow-uid <uid>` | Check escrow status |
+
+### Environment Management
+
+| Command | Description |
+|---------|-------------|
+| `nla switch <env>` | Switch between environments |
+| `nla network` | Show current environment |
+
+Available environments: `devnet`, `sepolia`, `base-sepolia`, `mainnet`
+
+### Global Options
+
+Most commands support these options:
+
+| Option | Description |
+|--------|-------------|
+| `--private-key <key>` | Private key for signing transactions |
+| `--rpc-url <url>` | Custom RPC endpoint URL |
+| `--deployment <file>` | Path to deployment JSON file |
+| `--env <file>` | Path to .env file |
+| `--help, -h` | Show command help |
+
+### Oracle-Specific Options
+
+When starting the oracle:
 
 ```bash
-# Terminal 1: Start Anvil
-anvil
+nla start-oracle [options]
 ```
 
-#### 2. Deploy Contracts
+| Option | Description |
+|--------|-------------|
+| `--rpc-url <url>` | RPC URL (overrides deployment file) |
+| `--private-key <key>` | Oracle operator private key |
+| `--deployment <file>` | Deployment file path |
+| `--polling-interval <ms>` | Polling interval (default: 5000ms) |
+| `--openai-api-key <key>` | OpenAI API key |
+| `--anthropic-api-key <key>` | Anthropic API key |
+| `--openrouter-api-key <key>` | OpenRouter API key |
+| `--perplexity-api-key <key>` | Perplexity API key |
+
+**Example with custom RPC:**
 
 ```bash
-# Terminal 2: Deploy to localhost
-export OPENAI_API_KEY=sk-your-key-here
-nla deploy
+nla start-oracle --rpc-url https://eth-mainnet.g.alchemy.com/v2/YOUR-KEY
 ```
 
-This creates `cli/deployments/devnet.json` with all contract addresses.
-
-#### 3. Start Oracle
+### Escrow Creation Options
 
 ```bash
-# Terminal 2 (or 3): Start oracle
-nla start-oracle
+nla escrow:create \
+  --demand <text> \
+  --amount <number> \
+  --token <address> \
+  --oracle <address> \
+  [--arbitration-provider <provider>] \
+  [--arbitration-model <model>] \
+  [--arbitration-prompt <prompt>] \
+  [--private-key <key>]
 ```
 
+| Option | Required | Description |
+|--------|----------|-------------|
+| `--demand` | Yes | Natural language demand |
+| `--amount` | Yes | Token amount to escrow |
+| `--token` | Yes | ERC20 token contract address |
+| `--oracle` | Yes | Oracle address |
+| `--arbitration-provider` | No | AI provider (default: OpenAI) |
+| `--arbitration-model` | No | Model name (default: gpt-4o-mini) |
+| `--arbitration-prompt` | No | Custom prompt template |
+| `--private-key` | No | Signer private key |
 
-Watch the oracle terminal - you'll see it process arbitration requests in real-time!
+### NPM Scripts
 
-## CLI Tools
+If installed from source, you can use npm/bun scripts:
 
-The `nla` CLI provides a unified interface for all Natural Language Agreement operations with support for multiple LLM providers.
+```bash
+bun run setup              # Same as: nla dev
+bun run deploy             # Same as: nla deploy
+bun run oracle             # Same as: nla start-oracle
+bun run stop               # Same as: nla stop
+bun run escrow:create      # Same as: nla escrow:create
+bun run escrow:fulfill     # Same as: nla escrow:fulfill
+bun run escrow:collect     # Same as: nla escrow:collect
+```
+
+## LLM Providers
 
 ### Supported LLM Providers
 
@@ -114,41 +235,45 @@ The oracle supports multiple AI providers for arbitration:
    - API Key: Get from [OpenRouter](https://openrouter.ai/keys)
    - Environment Variable: `OPENROUTER_API_KEY`
 
-### Installation
+4. **Perplexity** (for enhanced search)
+   - Optional: Enhances LLM responses with real-time search
+   - API Key: Get from [Perplexity](https://www.perplexity.ai/settings/api)
+   - Environment Variable: `PERPLEXITY_API_KEY`
 
-To use the `nla` command globally:
+## Examples
 
-```bash
-# From the natural-language-agreements directory
-bun link
-
-# Verify installation
-nla help
-```
-
-**Alternative (without global install):**
-```bash
-# Use the CLI directly
-bun run cli/index.ts help
-
-# Or use npm scripts
-bun run setup    # Same as: nla dev
-bun run deploy   # Same as: nla deploy
-```
-
-For a complete guide to all CLI commands and options, see [CLI Documentation](cli/README.md).
-
-### Quick CLI Examples
+### Basic Escrow Workflow
 
 ```bash
-# Create an escrow with OpenAI (default)
+# 1. Start development environment
+nla dev
+
+# 2. Create an escrow
 nla escrow:create \
   --demand "The sky is blue" \
   --amount 10 \
   --token 0xa513e6e4b8f2a923d98304ec87f64353c4d5c853 \
-  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+  --oracle 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
-# Create an escrow with custom arbitration settings
+# 3. Fulfill the escrow
+nla escrow:fulfill \
+  --escrow-uid 0x... \
+  --fulfillment "The sky appears blue today" \
+  --oracle 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+# 4. Check status
+nla escrow:status --escrow-uid 0x...
+
+# 5. Collect funds (if approved)
+nla escrow:collect \
+  --escrow-uid 0x... \
+  --fulfillment-uid 0x...
+```
+
+### Using Different AI Providers
+
+```bash
+# Create escrow with Anthropic Claude
 nla escrow:create \
   --demand "Deliver package by Friday" \
   --amount 100 \
@@ -157,19 +282,45 @@ nla escrow:create \
   --arbitration-provider "Anthropic" \
   --arbitration-model "claude-3-5-sonnet-20241022"
 
-# Fulfill an escrow
-nla escrow:fulfill \
-  --escrow-uid 0x... \
-  --fulfillment "The sky appears blue today" \
-  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+# Create escrow with OpenRouter
+nla escrow:create \
+  --demand "Write a 1000-word article" \
+  --amount 50 \
+  --token 0xa513e6e4b8f2a923d98304ec87f64353c4d5c853 \
+  --oracle 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \
+  --arbitration-provider "OpenRouter" \
+  --arbitration-model "anthropic/claude-3-opus"
+```
 
-# Check escrow status
-nla escrow:status --escrow-uid 0x...
+### Custom RPC and Deployment
 
-# Collect approved escrow
-nla escrow:collect \
-  --escrow-uid 0x... \
-  --fulfillment-uid 0x...
+```bash
+# Deploy to custom network
+nla deploy \
+  --network sepolia \
+  --rpc-url https://sepolia.infura.io/v3/YOUR-KEY \
+  --private-key 0x...
+
+# Start oracle with custom RPC
+nla start-oracle \
+  --rpc-url https://eth-mainnet.g.alchemy.com/v2/YOUR-KEY \
+  --private-key 0x...
+
+# Use specific deployment file
+nla start-oracle --deployment ./my-deployment.json
+```
+
+### Wallet Management
+
+```bash
+# Save private key globally
+nla wallet:set --private-key 0x...
+
+# Check current wallet
+nla wallet:show
+
+# Clear saved key
+nla wallet:clear
 ```
 
 ## Deployment to Other Networks
@@ -196,103 +347,150 @@ nla start-oracle sepolia
 export PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
 
-# Deploy
+# Deploy contracts
 nla deploy mainnet https://mainnet.infura.io/v3/YOUR-KEY
 
 # Start oracle (consider running as a service)
-nla start-oracle mainnet
+nla start-oracle --rpc-url https://mainnet.infura.io/v3/YOUR-KEY
 ```
 
-## Available Commands
+## Environment Configuration
 
-The `nla` CLI provides unified access to all functionality:
+The CLI uses environment files and a config directory for storing settings:
+
+### Environment Variables
+
+Create a `.env` file in your project root:
 
 ```bash
-nla dev                       # Complete local setup (all-in-one)
-nla deploy [network] [rpc]    # Deploy contracts to network
-nla start-oracle [network]    # Start oracle for network
-nla stop                      # Stop all services
+# Private Keys
+PRIVATE_KEY=0x...                    # For signing transactions
 
-nla escrow:create [options]   # Create a new escrow
-nla escrow:fulfill [options]  # Fulfill an existing escrow
-nla escrow:collect [options]  # Collect an approved escrow
-nla escrow:status [options]   # Check escrow status
+# RPC URLs
+RPC_URL=http://localhost:8545        # Default RPC endpoint
 
-nla help                      # Show help
+# LLM Provider API Keys (at least one required)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+OPENROUTER_API_KEY=sk-or-...
+PERPLEXITY_API_KEY=pplx-...          # Optional for search
 ```
 
-### Escrow Creation Options
+### Config Directory
 
-When creating an escrow, you can customize the arbitration settings:
+The CLI stores configuration in `~/.nla/`:
+
+- `~/.nla/config.json` - Saved wallet private key (via `nla wallet:set`)
+- `~/.nla/environment` - Current active environment
+
+## Advanced Usage
+
+### Using Custom Deployment Files
+
+Create a custom deployment file:
+
+```json
+{
+  "network": "custom",
+  "chainId": 1,
+  "rpcUrl": "https://your-rpc.example.com",
+  "addresses": {
+    "eas": "0x...",
+    "trustedOracleArbiter": "0x...",
+    "erc20EscrowObligation": "0x..."
+  }
+}
+```
+
+Use it with commands:
 
 ```bash
-nla escrow:create \
-  --demand "Your natural language demand" \
-  --amount <token-amount> \
-  --token <erc20-token-address> \
-  --oracle <oracle-address> \
-  --arbitration-provider "OpenAI|Anthropic|OpenRouter" \  # Optional, default: OpenAI
-  --arbitration-model "model-name" \                       # Optional, default: gpt-4o-mini
-  --arbitration-prompt "Custom prompt template"            # Optional
+nla start-oracle --deployment ./my-deployment.json
+nla escrow:create --deployment ./my-deployment.json ...
 ```
 
-**Default Arbitration Settings:**
-- Provider: `OpenAI`
-- Model: `gpt-4o-mini`
-- Prompt: Standard evaluation template
+### Running Oracle as a Service
 
-**NPM Scripts (alternative):**
-```bash
-bun run setup                 # Same as: nla dev
-bun run deploy                # Same as: nla deploy
-bun run oracle                # Same as: nla start-oracle
-bun run stop                  # Same as: nla stop
+For production deployments, run the oracle as a systemd service:
+
+```ini
+[Unit]
+Description=NLA Oracle Service
+After=network.target
+
+[Service]
+Type=simple
+User=nla
+WorkingDirectory=/home/nla
+ExecStart=/usr/bin/nla start-oracle --rpc-url https://mainnet.infura.io/v3/YOUR-KEY
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-## Monitoring
+### Multiple Environments
 
-### View Oracle Logs
-
-```bash
-# If using systemd
-sudo journalctl -u nla-oracle -f
-
-# If using nohup
-tail -f oracle.log
-
-# If using Anvil
-tail -f anvil.log
-```
-
-### Check Oracle Status
+Switch between different networks:
 
 ```bash
-# Check if oracle is running
-ps aux | grep "bun run oracle"
+# Switch to sepolia
+nla switch sepolia
 
-# Check if Anvil is running
-lsof -i :8545
+# Check current environment
+nla network
+
+# Switch to mainnet
+nla switch mainnet
+
+# Back to local development
+nla switch devnet
 ```
 
-## Usage
+## Troubleshooting
 
-### Running Tests
+### Common Issues
 
+**"Private key is required" error:**
 ```bash
-bun test
+# Option 1: Set globally
+nla wallet:set --private-key 0x...
+
+# Option 2: Export environment variable
+export PRIVATE_KEY=0x...
+
+# Option 3: Pass with command
+nla deploy --private-key 0x...
 ```
 
-### Development Mode
-
-To run:
-
+**"RPC URL not found" error:**
 ```bash
-bun run index.ts
+# Option 1: Pass RPC URL
+nla start-oracle --rpc-url https://...
+
+# Option 2: Set in environment
+export RPC_URL=https://...
+
+# Option 3: Use deployment file with rpcUrl
+nla start-oracle --deployment ./deployment.json
 ```
 
-## Development
+**"No LLM provider API key" error:**
+```bash
+# Set at least one provider key
+export OPENAI_API_KEY=sk-...
+# or
+export ANTHROPIC_API_KEY=sk-ant-...
+```
 
-This project was created using `bun init` in bun v1.2.20. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## Documentation
+
+For more detailed documentation:
+
+- [CLI Documentation](cli/README.md) - Complete CLI reference
+- [API Documentation](https://github.com/arkhai-io/natural-language-agreements) - GitHub repository
+- [Alkahest SDK](https://github.com/arkhai-io/alkahest-ts) - Underlying SDK
 
 ## Project Structure
 
@@ -308,104 +506,49 @@ natural-language-agreements/
 │   ├── server/                   # Server-side components
 │   │   ├── deploy.ts             # Contract deployment script
 │   │   └── oracle.ts             # Multi-provider oracle service
-│   ├── scripts/                  # Shell scripts for orchestration
-│   │   ├── dev.sh                # Development environment setup
-│   │   ├── deploy.sh             # Deployment wrapper
-│   │   ├── start-oracle.sh       # Oracle starter
-│   │   └── stop.sh               # Cleanup script
+│   ├── commands/                 # CLI command implementations
+│   │   ├── dev.ts                # Development environment setup
+│   │   ├── stop.ts               # Stop services
+│   │   ├── switch.ts             # Switch environments
+│   │   └── wallet.ts             # Wallet management
 │   └── deployments/              # Deployment addresses (generated)
 │       ├── devnet.json
 │       ├── sepolia.json
+│       ├── base-sepolia.json
 │       └── mainnet.json
 ├── nla.ts                        # Natural Language Agreement client library
-│                                 # - Multi-provider LLM support
-│                                 # - Arbitration encoding/decoding
-│                                 # - OpenAI, Anthropic, OpenRouter integration
-├── tests/
-│   ├── nla.test.ts               # Basic tests
-│   └── nlaOracle.test.ts         # Oracle arbitration tests
+├── tests/                        # Test files
+│   ├── nla.test.ts
+│   └── nlaOracle.test.ts
 ├── index.ts                      # Main exports
-├── package.json
-└── README.md
+└── package.json                  # Package configuration
 ```
-
-## Troubleshooting
-
-### "Cannot find module 'alkahest-ts'"
-- Run `bun install` to ensure all dependencies are installed
-- Clear the cache: `rm -rf node_modules && bun install`
-- Check that package.json includes alkahest-ts dependency
-
-### "Deployer has no ETH"
-- Fund your deployer account before running deployment
-- For testnets, use a faucet
-
-### "Oracle not detecting arbitration requests"
-- Verify RPC URL is correct and accessible
-- Check that EAS contract address matches deployment
-- Ensure oracle has ETH for gas
-- Check polling interval (try lowering it)
-
-### "OpenAI API errors"
-- Verify API key is valid and active
-- Check OpenAI usage limits and billing
-- Ensure model name is correct (e.g., "gpt-4o-mini", "gpt-4o")
-
-### "Anthropic API errors"
-- Verify ANTHROPIC_API_KEY is set correctly
-- Check Anthropic usage limits and billing
-- Ensure model name is correct (e.g., "claude-3-5-sonnet-20241022")
-
-### "Arbitration provider not found"
-- The oracle was configured with a different provider than the escrow
-- Make sure the oracle has the correct API keys for the provider specified in the escrow
-- Supported providers: OpenAI, Anthropic, OpenRouter
-
-### "Module resolution errors"
-- Run `bun install` to ensure alkahest-ts is properly installed
-- Check that you're using the correct version of Bun: `bun --version`
-- Clear Bun's cache: `rm -rf node_modules && bun install`
 
 ## Security Notes
 
 ⚠️ **Important Security Considerations:**
 
-- Never commit your real private keys to version control
+- Never commit real private keys to version control
 - Use environment variables or secure secret management for production
 - The `.env` file is gitignored by default
-- The example private key in `.env.example` is from Anvil and should NEVER be used in production
-- Keep all API keys secure (OpenAI, Anthropic, OpenRouter):
-  * Don't expose them in logs or error messages
-  * Use environment variables or secure secret management
-  * Rotate keys regularly
-  * Monitor usage for unauthorized access
-- Run the oracle in a secure environment with proper access controls
+- Example keys in `.env.example` are from Anvil - NEVER use in production
+- Keep API keys secure (OpenAI, Anthropic, OpenRouter)
 - For production deployments:
   * Use hardware wallets or secure key management services
   * Implement rate limiting on the oracle
   * Monitor arbitration decisions for anomalies
-  * Consider using a multi-signature setup for critical operations
+  * Consider multi-signature setups for critical operations
 
-## Features
+## License
 
-✨ **Multi-Provider LLM Support**
-- OpenAI (GPT-4, GPT-4o, GPT-3.5-turbo)
-- Anthropic (Claude 3 family)
-- OpenRouter (Access to any model)
-- Configurable per-escrow arbitration settings
+MIT
 
-🔧 **Flexible Configuration**
-- Custom arbitration prompts
-- Provider and model selection
-- Default settings with override capability
+## Contributing
 
-🚀 **Easy Deployment**
-- One-command development setup (`nla dev`)
-- Automated contract deployment
-- Built-in test token distribution
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-⚡ **Developer Friendly**
-- TypeScript support
-- Comprehensive CLI tools
-- Unified interface for all operations
-- Detailed error messages and logging
+## Support
+
+For issues and questions:
+- GitHub Issues: https://github.com/arkhai-io/natural-language-agreements/issues
+- Documentation: [CLI README](cli/README.md)
