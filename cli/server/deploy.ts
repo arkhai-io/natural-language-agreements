@@ -164,7 +164,7 @@ async function main() {
         const SchemaRegistry = fixtures.SchemaRegistry;
         const MockERC20Permit = fixtures.MockERC20Permit;
         const TrustedOracleArbiter = contracts.TrustedOracleArbiter;
-        const StringObligation = contracts.StringObligation;
+        const CommitRevealObligation = contracts.CommitRevealObligation;
         const ERC20EscrowObligation = contracts.ERC20EscrowObligation;
         const ERC20PaymentObligation = contracts.ERC20PaymentObligation;
         const ERC20BarterUtils = contracts.ERC20BarterUtils;
@@ -229,10 +229,10 @@ async function main() {
         // Deploy obligations
         console.log("📋 Deploying obligations...\n");
 
-        addresses.stringObligation = await deployContract(
-            "String Obligation",
-            StringObligation.abi.abi,
-            StringObligation.abi.bytecode.object,
+        addresses.commitRevealObligation = await deployContract(
+            "Commit Reveal Obligation",
+            CommitRevealObligation.abi.abi,
+            CommitRevealObligation.abi.bytecode.object,
             [addresses.eas, addresses.easSchemaRegistry]
         );
 
@@ -338,8 +338,8 @@ async function main() {
         const scriptDir = import.meta.dir;
         const projectRoot = resolve(scriptDir, "../..");
         
-        // Map localhost to devnet for file naming
-        const deploymentFileName = network === "localhost" ? "devnet" : network;
+        // Map localhost to anvil for file naming
+        const deploymentFileName = network === "localhost" ? "anvil" : network;
         const outputPath = args.output || resolve(projectRoot, `cli/deployments/${deploymentFileName}.json`);
         const outputDir = resolve(outputPath, "..");
         

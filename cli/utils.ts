@@ -62,7 +62,7 @@ export function getChainFromNetwork(network: string): Chain {
     
     switch (normalized) {
         case "localhost":
-        case "devnet":
+        case "anvil":
             return foundry;
         case "sepolia":
         case "ethereum-sepolia":
@@ -95,15 +95,15 @@ export function getCurrentEnvironment(): string {
     const configPath = join(getNLAConfigDir(), 'config.json');
     
     if (!existsSync(configPath)) {
-        // Default to devnet
-        return 'devnet';
+        // Default to anvil
+        return 'anvil';
     }
     
     try {
         const config = JSON.parse(readFileSync(configPath, 'utf-8'));
-        return config.environment || 'devnet';
+        return config.environment || 'anvil';
     } catch (e) {
-        return 'devnet';
+        return 'anvil';
     }
 }
 
@@ -177,7 +177,7 @@ export function clearPrivateKey(): void {
 /**
  * Get deployment path for environment
  * Automatically looks in the CLI directory where utils.ts is located
- * @param env - The environment name (devnet, sepolia, etc.)
+ * @param env - The environment name (anvil, sepolia, etc.)
  */
 export function getDeploymentPath(env?: string): string {
     const environment = env || getCurrentEnvironment();

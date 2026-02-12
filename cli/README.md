@@ -99,7 +99,7 @@ Monitor the escrow and arbitration progress:
 ```bash
 nla escrow:status \
   --escrow-uid 0x... \
-  --deployment ./cli/deployments/devnet.json
+  --deployment ./cli/deployments/anvil.json
 ```
 
 This will show:
@@ -185,7 +185,7 @@ Options:
   --token <address>            ERC20 token address (required)
   --oracle <address>           Oracle address (required)
   --private-key <key>          Your private key (or set PRIVATE_KEY env var)
-  --deployment <path>          Deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment)
   --help, -h                   Show help
 ```
@@ -200,7 +200,7 @@ Options:
   --fulfillment <text>         Your fulfillment text (required)
   --oracle <address>           Oracle address (required)
   --private-key <key>          Your private key (or set PRIVATE_KEY env var)
-  --deployment <path>          Deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment)
   --help, -h                   Show help
 ```
@@ -214,7 +214,7 @@ Options:
   --escrow-uid <uid>           Escrow UID (required)
   --fulfillment-uid <uid>      Approved fulfillment UID (required)
   --private-key <key>          Your private key (or set PRIVATE_KEY env var)
-  --deployment <path>          Deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment)
   --help, -h                   Show help
 ```
@@ -226,7 +226,7 @@ nla escrow:status [options]
 
 Options:
   --escrow-uid <uid>           Escrow UID to check (required)
-  --deployment <path>          Deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment)
   --help, -h                   Show help
 ```
@@ -293,7 +293,7 @@ nla escrow:fulfill \
 # Terminal 2: Check the status
 nla escrow:status \
   --escrow-uid 0xd9e1402e96c2f7a64e60bf53a45445f7254e9b72389f6ede25181bff542d7b65 \
-  --deployment ./cli/deployments/devnet.json
+  --deployment ./cli/deployments/anvil.json
 
 # Terminal 2: Collect the escrow (as Bob)
 nla escrow:collect \

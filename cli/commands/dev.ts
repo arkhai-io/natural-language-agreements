@@ -72,14 +72,14 @@ export async function runDevCommand(cliDir: string, envPath?: string, cliPrivate
     console.log(`${colors.blue}  Natural Language Agreement Oracle - Quick Setup${colors.reset}`);
     console.log(`${colors.blue}════════════════════════════════════════════════════════${colors.reset}\n`);
 
-    // Auto-switch to devnet environment
+    // Auto-switch to anvil environment
     const currentEnv = getCurrentEnvironment();
-    if (currentEnv !== 'devnet') {
-        console.log(`${colors.yellow}🔄 Switching environment from ${currentEnv} to devnet...${colors.reset}`);
-        setCurrentEnvironment('devnet');
-        console.log(`${colors.green}✅ Switched to devnet${colors.reset}\n`);
+    if (currentEnv !== 'anvil') {
+        console.log(`${colors.yellow}🔄 Switching environment from ${currentEnv} to anvil...${colors.reset}`);
+        setCurrentEnvironment('anvil');
+        console.log(`${colors.green}✅ Switched to anvil${colors.reset}\n`);
     } else {
-        console.log(`${colors.green}✅ Already on devnet environment${colors.reset}\n`);
+        console.log(`${colors.green}✅ Already on anvil environment${colors.reset}\n`);
     }
 
     // Load .env file first
@@ -188,8 +188,8 @@ export async function runDevCommand(cliDir: string, envPath?: string, cliPrivate
     const oracleScript = join(cliDir, 'server', 'oracle.js');
     
     // Look for deployment file in source directory (for local dev) or dist directory (for installed package)
-    const sourcePath = join(process.cwd(), 'cli', 'deployments', 'devnet.json');
-    const distPath = join(cliDir, 'deployments', 'devnet.json');
+    const sourcePath = join(process.cwd(), 'cli', 'deployments', 'anvil.json');
+    const distPath = join(cliDir, 'deployments', 'anvil.json');
     const deploymentFile = existsSync(sourcePath) ? sourcePath : distPath;
     
     const oracleArgs = ['run', oracleScript, '--deployment', deploymentFile];

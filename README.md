@@ -136,7 +136,7 @@ nla stop
 | `nla switch <env>` | Switch between environments |
 | `nla network` | Show current environment |
 
-Available environments: `devnet`, `sepolia`, `base-sepolia`, `mainnet`
+Available environments: `anvil`, `sepolia`, `base-sepolia`, `mainnet`
 
 ### Global Options
 
@@ -445,7 +445,7 @@ nla network
 nla switch mainnet
 
 # Back to local development
-nla switch devnet
+nla switch anvil
 ```
 
 ## Troubleshooting
@@ -512,7 +512,7 @@ natural-language-agreements/
 │   │   ├── switch.ts             # Switch environments
 │   │   └── wallet.ts             # Wallet management
 │   └── deployments/              # Deployment addresses (generated)
-│       ├── devnet.json
+│       ├── anvil.json
 │       ├── sepolia.json
 │       ├── base-sepolia.json
 │       └── mainnet.json

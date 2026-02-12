@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseArgs } from "util";
-import { parseAbiParameters, createWalletClient, http, publicActions } from "viem";
+import { createWalletClient, http, publicActions, fromHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { makeLLMClient } from "../..";
 import { existsSync, readFileSync } from "fs";
@@ -250,22 +250,16 @@ async function main() {
         console.log("\n🎯 LLM Arbitrator configured and ready\n");
         console.log("👂 Listening for arbitration requests...\n");
 
-        // Define the obligation ABI
-        const obligationAbi = parseAbiParameters("(string item)");
-
         // Start listening and arbitrating
         const { unwatch } = await client.arbiters.general.trustedOracle.arbitrateMany(
             async ({ attestation, demand }) => {
                 console.log(`\n📨 New arbitration request received!`);
                 console.log(`   Attestation UID: ${attestation.uid}`);
-                
+
                 try {
-                    // Extract obligation data
-                    const obligation = client.extractObligationData(
-                        obligationAbi,
-                        attestation,
-                    );
-                    const obligationItem = obligation[0].item;
+                    // Extract obligation data from CommitRevealObligation
+                    const commitRevealData = client.commitReveal.decode(attestation.data);
+                    const obligationItem = fromHex(commitRevealData.payload, 'string');
                     console.log(`   Obligation: "${obligationItem}"`);
 
                     const trustedOracleDemandData = client.arbiters.general.trustedOracle.decodeDemand(demand);
@@ -324,7 +318,7 @@ async function main() {
             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log("📝 Next Steps - Create Your First Escrow:\n");
             
-            if (currentEnv === 'devnet') {
+            if (currentEnv === 'anvil') {
                 console.log("1. Export your private key (use a test account):");
                 console.log("   export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80\n");
             } else {
@@ -337,7 +331,7 @@ async function main() {
             console.log("     --demand \"The sky is blue\" \\");
             console.log("     --amount 10 \\");
             
-            if (currentEnv === 'devnet' && deployment.addresses.mockERC20A) {
+            if (currentEnv === 'anvil' && deployment.addresses.mockERC20A) {
                 console.log(`     --token ${deployment.addresses.mockERC20A} \\`);
             } else {
                 console.log("     --token <ERC20_TOKEN_ADDRESS> \\");

@@ -32,7 +32,7 @@ Options:
   --escrow-uid <uid>           Escrow UID to collect (required)
   --fulfillment-uid <uid>      Fulfillment UID that was approved (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 

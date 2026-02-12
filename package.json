@@ -1,6 +1,6 @@
 {
   "name": "nla",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
   "type": "module",
   "private": false,
@@ -66,7 +66,7 @@
     "@perplexity-ai/ai-sdk": "^0.1.2",
     "@viem/anvil": "^0.0.10",
     "ai": "^6.0.5",
-    "alkahest-ts": "^0.6.1",
+    "alkahest-ts": "0.7.2",
     "arktype": "^2.1.23",
     "viem": "^2.42.1",
     "zod": "^3.25.76"

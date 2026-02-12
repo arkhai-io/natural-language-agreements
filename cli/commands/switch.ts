@@ -33,7 +33,7 @@ export function runSwitchCommand(env?: string) {
         const current = getCurrentEnvironment();
         console.log(`${colors.blue}Current environment:${colors.reset} ${colors.green}${current}${colors.reset}\n`);
         console.log('Available environments:');
-        console.log('  • devnet       (local Anvil blockchain)');
+        console.log('  • anvil       (local Anvil blockchain)');
         console.log('  • sepolia      (Ethereum Sepolia testnet)');
         console.log('  • base-sepolia (Base Sepolia testnet)');
         console.log('  • mainnet      (Ethereum mainnet)\n');
@@ -43,10 +43,10 @@ export function runSwitchCommand(env?: string) {
     }
 
     // Validate environment
-    const validEnvs = ['devnet', 'sepolia', 'base-sepolia', 'mainnet'];
+    const validEnvs = ['anvil', 'sepolia', 'base-sepolia', 'mainnet'];
     if (!validEnvs.includes(env)) {
         console.error(`${colors.red}❌ Invalid environment: ${env}${colors.reset}`);
-        console.log('Valid environments: devnet, sepolia, base-sepolia, mainnet\n');
+        console.log('Valid environments: anvil, sepolia, base-sepolia, mainnet\n');
         process.exit(1);
     }
 
@@ -62,7 +62,7 @@ export function runSwitchCommand(env?: string) {
     console.log(`${colors.green}✅ Switched to ${env}${colors.reset}\n`);
     
     // Show info about the environment
-    if (env === 'devnet') {
+    if (env === 'anvil') {
         console.log('📝 Using local Anvil blockchain (http://localhost:8545)');
         console.log('   Run "nla dev" to start the development environment\n');
     } else if (env === 'sepolia') {

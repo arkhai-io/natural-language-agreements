@@ -20,7 +20,7 @@
     "attestationEscrowObligation": "",
     "attestationEscrowObligation2": "",
     "attestationBarterUtils": "",
-    "stringObligation": "",
+    "commitRevealObligation": "",
     "trivialArbiter": "",
     "trustedOracleArbiter": "",
     "anyArbiter": "",

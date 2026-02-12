@@ -30,7 +30,7 @@ Commands:
   deploy           Deploy contracts to blockchain
   start-oracle     Start the oracle service
   stop             Stop all services (Anvil + Oracle)
-  switch [env]     Switch between environments (devnet, sepolia, base-sepolia, mainnet)
+  switch [env]     Switch between environments (anvil, sepolia, base-sepolia, mainnet)
   network          Show current network/environment
   wallet:set       Set wallet private key
   wallet:show      Show current wallet address

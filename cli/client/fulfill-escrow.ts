@@ -7,7 +7,7 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, formatEther } from "viem";
+import { createWalletClient, http, publicActions, formatEther, toHex, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
@@ -35,7 +35,7 @@ Options:
   --fulfillment <text>         Your fulfillment text (required)
   --oracle <address>           Oracle address that will arbitrate (required)
   --private-key <key>          Your private key (required)
-  --deployment <path>          Path to deployment file (default: ./cli/deployments/devnet.json)
+  --deployment <path>          Path to deployment file (default: ./cli/deployments/anvil.json)
   --rpc-url <url>              RPC URL (default: from deployment file)
   --help, -h                   Display this help message
 
@@ -170,11 +170,40 @@ async function main() {
 
         console.log("📋 Creating fulfillment obligation...\n");
 
-        // Create the fulfillment
-        const { attested: fulfillmentAttestation } = await client.stringObligation.doObligation(
-            fulfillment,
+        // Create the fulfillment using CommitRevealObligation (commit-reveal flow)
+        const schema = keccak256(toHex("{item:string}"));
+        const salt = keccak256(toHex(crypto.randomUUID()));
+        const payload = toHex(fulfillment);
+        const obligationData = { payload, salt, schema };
+
+        // Step 1: Compute and submit commitment
+        console.log("🔒 Computing commitment...");
+        const commitment = await client.commitReveal.computeCommitment(
+            escrowUid as `0x${string}`,
+            account.address,
+            obligationData,
+        );
+        console.log(`   Commitment: ${commitment}`);
+
+        console.log("📝 Submitting commitment (with bond)...");
+        const { hash: commitHash } = await client.commitReveal.commit(commitment);
+        console.log(`   Commit tx: ${commitHash}`);
+
+        // Step 2: Wait for next block
+        console.log("⏳ Waiting for next block...");
+        await walletClient.waitForTransactionReceipt({ hash: commitHash });
+
+        // Step 3: Reveal - create the obligation
+        console.log("🔓 Revealing obligation...");
+        const { attested: fulfillmentAttestation } = await client.commitReveal.doObligation(
+            obligationData,
             escrowUid as `0x${string}`,
         );
+
+        // Step 4: Reclaim bond
+        console.log("💰 Reclaiming bond...");
+        await client.commitReveal.reclaimBond(fulfillmentAttestation.uid);
+
         console.log("✅ Fulfillment created!\n");
         console.log("📋 Fulfillment Details:");
         console.log(`   UID: ${fulfillmentAttestation.uid}`);
