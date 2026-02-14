@@ -1,5 +1,5 @@
 {
-  "network": "Ethereum Sepolia",
+  "network": "Sepolia",
   "chainId": 11155111,
   "rpcUrl": "https://base-sepolia.infura.io/v3/...",
   "addresses": {
