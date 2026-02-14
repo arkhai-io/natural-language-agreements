@@ -1,74 +1,74 @@
 {
-  "name": "nla",
-  "version": "1.1.0",
-  "description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
-  "type": "module",
-  "private": false,
-  "author": "Arkhai",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/arkhai-io/natural-language-agreements.git"
-  },
-  "keywords": [
-    "blockchain",
-    "ethereum",
-    "smart-contracts",
-    "natural-language",
-    "oracle",
-    "ai",
-    "llm",
-    "escrow"
-  ],
-  "bin": {
-    "nla": "dist/cli/index.js"
-  },
-  "files": [
-    "dist/**/*",
-    "README.md",
-    ".env.example"
-  ],
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "preferGlobal": true,
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.9.3"
-  },
-  "scripts": {
-    "build": "tsc --project tsconfig.build.json && chmod +x dist/cli/index.js && cp -r cli/deployments dist/cli/",
-    "prepublishOnly": "npm run build",
-    "patch": "npm version patch",
-    "minor": "npm version minor",
-    "major": "npm version major",
-    "dev": "bun run index.ts",
-    "public": "npm publish --access public",
-    "start": "bun run index.ts",
-    "test": "bun test ./tests --exclude alkahest-ts/** ",
-    "setup": "bun run cli/index.ts dev",
-    "deploy": "bun run cli/index.ts deploy",
-    "oracle": "bun run cli/index.ts start-oracle",
-    "stop": "bun run cli/index.ts stop",
-    "escrow:create": "bun run cli/index.ts escrow:create",
-    "escrow:fulfill": "bun run cli/index.ts escrow:fulfill",
-    "escrow:collect": "bun run cli/index.ts escrow:collect",
-    "escrow:status": "bun run cli/index.ts escrow:status"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.2",
-    "@ai-sdk/openai": "^3.0.2",
-    "@openrouter/ai-sdk-provider": "^1.5.4",
-    "@perplexity-ai/ai-sdk": "^0.1.2",
-    "@viem/anvil": "^0.0.10",
-    "ai": "^6.0.5",
-    "alkahest-ts": "0.7.2",
-    "arktype": "^2.1.23",
-    "viem": "^2.42.1",
-    "zod": "^3.25.76"
-  }
+	"name": "nla",
+	"version": "1.1.1",
+	"description": "Natural Language Agreement Oracle - CLI for creating and managing blockchain agreements using natural language",
+	"type": "module",
+	"private": false,
+	"author": "Arkhai",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/arkhai-io/natural-language-agreements.git"
+	},
+	"keywords": [
+		"blockchain",
+		"ethereum",
+		"smart-contracts",
+		"natural-language",
+		"oracle",
+		"ai",
+		"llm",
+		"escrow"
+	],
+	"bin": {
+		"nla": "dist/cli/index.js"
+	},
+	"files": [
+		"dist/**/*",
+		"README.md",
+		".env.example"
+	],
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"preferGlobal": true,
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/node": "^20.0.0",
+		"typescript": "^5.9.3"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json && chmod +x dist/cli/index.js && cp -r cli/deployments dist/cli/",
+		"prepublishOnly": "npm run build",
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major",
+		"dev": "bun run index.ts",
+		"public": "npm publish --access public",
+		"start": "bun run index.ts",
+		"test": "bun test ./tests --exclude alkahest-ts/** ",
+		"setup": "bun run cli/index.ts dev",
+		"deploy": "bun run cli/index.ts deploy",
+		"oracle": "bun run cli/index.ts start-oracle",
+		"stop": "bun run cli/index.ts stop",
+		"escrow:create": "bun run cli/index.ts escrow:create",
+		"escrow:fulfill": "bun run cli/index.ts escrow:fulfill",
+		"escrow:collect": "bun run cli/index.ts escrow:collect",
+		"escrow:status": "bun run cli/index.ts escrow:status"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@ai-sdk/anthropic": "^3.0.2",
+		"@ai-sdk/openai": "^3.0.2",
+		"@openrouter/ai-sdk-provider": "^1.5.4",
+		"@perplexity-ai/ai-sdk": "^0.1.2",
+		"@viem/anvil": "^0.0.10",
+		"ai": "^6.0.5",
+		"alkahest-ts": "0.7.2",
+		"arktype": "^2.1.23",
+		"viem": "^2.42.1",
+		"zod": "^3.25.76"
+	}
 }
