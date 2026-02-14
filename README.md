@@ -2,6 +2,10 @@
 
 Natural Language Agreement Oracle - Create and manage blockchain escrows using natural language demands powered by AI.
 
+## Public Demo
+
+A public demo oracle is deployed on Ethereum Sepolia at [`0xc5c132B69f57dAAAb75d9ebA86cab504b272Ccbc`](https://sepolia.etherscan.io/address/0xc5c132B69f57dAAAb75d9ebA86cab504b272Ccbc). You can use this oracle to test escrow creation and fulfillment on the Sepolia testnet without deploying your own oracle.
+
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
