@@ -132,6 +132,7 @@ nla stop
 | `nla escrow:fulfill [options]` | Submit fulfillment for an escrow |
 | `nla escrow:collect [options]` | Collect approved escrow funds |
 | `nla escrow:status --escrow-uid <uid>` | Check escrow status |
+| `nla escrow:arbitrate [options]` | Manually arbitrate escrow fulfillments |
 
 ### Environment Management
 

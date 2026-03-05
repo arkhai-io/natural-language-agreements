@@ -39,6 +39,7 @@ Commands:
   escrow:fulfill   Fulfill an existing escrow
   escrow:collect   Collect an approved escrow
   escrow:status    Check the status of an escrow
+  escrow:arbitrate Manually arbitrate escrow fulfillments
   help             Display this help message
 
 Options (vary by command):
@@ -98,6 +99,12 @@ Examples:
 
   # Check escrow status
   nla escrow:status --escrow-uid 0x...
+
+  # Manually arbitrate a specific escrow
+  nla escrow:arbitrate --escrow-uid 0x...
+
+  # Scan for all pending arbitration requests
+  nla escrow:arbitrate --escrow-uid all
 `);
 }
 
@@ -135,6 +142,11 @@ function parseCliArgs() {
             "arbitration-prompt": { type: "string" },
             "env": { type: "string" },
             "environment": { type: "string" },
+            "auto": { type: "boolean" },
+            "openai-api-key": { type: "string" },
+            "anthropic-api-key": { type: "string" },
+            "openrouter-api-key": { type: "string" },
+            "perplexity-api-key": { type: "string" },
             "help": { type: "boolean", short: "h" },
         },
         strict: command !== "switch" && command !== "network", // Allow positional args for switch command
@@ -234,6 +246,9 @@ async function main() {
                 break;
             case "escrow:status":
                 scriptPath = "./client/status-escrow.js";
+                break;
+            case "escrow:arbitrate":
+                scriptPath = "./client/arbitrate-escrow.js";
                 break;
             default:
                 console.error(`❌ Unknown command: ${command}`);
