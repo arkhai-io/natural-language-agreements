@@ -15,6 +15,7 @@ A public demo oracle is deployed on Ethereum Sepolia at [`0xc5c132B69f57dAAAb75d
 - [LLM Providers](#llm-providers)
 - [Deployment](#deployment-to-other-networks)
 - [Examples](#examples)
+- [Agent Skills](#agent-skills)
 
 ## Prerequisites
 
@@ -521,6 +522,10 @@ natural-language-agreements/
 │       ├── sepolia.json
 │       ├── base-sepolia.json
 │       └── mainnet.json
+├── skills/                       # Agent skills for AI coding assistants
+│   ├── nla-create/               # Escrow creation skill
+│   ├── nla-fulfill/              # Escrow fulfillment skill
+│   └── nla-arbitrate/            # Manual arbitration skill
 ├── nla.ts                        # Natural Language Agreement client library
 ├── tests/                        # Test files
 │   ├── nla.test.ts
@@ -529,20 +534,42 @@ natural-language-agreements/
 └── package.json                  # Package configuration
 ```
 
-## Security Notes
+## Agent Skills
 
-⚠️ **Important Security Considerations:**
+The `skills/` directory contains agent skills for AI coding assistants ([Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/AidenYuanDev/OpenClaw), etc.) that can create, fulfill, and arbitrate NLA escrows conversationally.
 
-- Never commit real private keys to version control
-- Use environment variables or secure secret management for production
-- The `.env` file is gitignored by default
-- Example keys in `.env.example` are from Anvil - NEVER use in production
-- Keep API keys secure (OpenAI, Anthropic, OpenRouter)
-- For production deployments:
-  * Use hardware wallets or secure key management services
-  * Implement rate limiting on the oracle
-  * Monitor arbitration decisions for anomalies
-  * Consider multi-signature setups for critical operations
+### Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| `nla-create` | Create an escrow with a natural language demand |
+| `nla-fulfill` | Submit fulfillment for an escrow and collect tokens |
+| `nla-arbitrate` | Manually arbitrate pending escrow fulfillments |
+
+### Installation
+
+#### Claude Code (via plugin marketplace)
+
+```
+/plugin marketplace add arkhai-io/claude-plugins
+/plugin install nla-plugin@arkhai-plugins
+```
+
+See the [arkhai-plugins marketplace](https://github.com/arkhai-io/claude-plugins) for all available plugins.
+
+#### Manual
+
+Each skill is a directory under `skills/` containing a `SKILL.md` file. Any agent that supports SKILL.md-based skill definitions (Claude Code, OpenClaw, etc.) can use them directly.
+
+### Usage
+
+Once installed, you can ask your agent things like:
+
+- "Create an escrow for 100 tokens with the demand 'Prove the Riemann hypothesis'"
+- "Fulfill escrow 0xabc123... with this proof: ..."
+- "Check for pending arbitration requests and review them"
+
+The skills require the `nla` CLI to be installed (`npm install -g nla`) and a configured wallet.
 
 ## License
 
