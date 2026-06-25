@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, fromHex } from "viem";
+import { createWalletClient, publicActions, fromHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { makeLLMClient } from "../..";
 import { existsSync, readFileSync } from "fs";
@@ -16,7 +16,8 @@ import {
     loadEnvFile,
     loadDeploymentWithDefaults,
     getChainFromNetwork,
-    getPrivateKey
+    getPrivateKey,
+    getRpcTransport
 } from "../utils.js";
 
 // Get the directory name for ESM modules
@@ -204,7 +205,7 @@ async function main() {
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions) as any;
 
 

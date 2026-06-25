@@ -6,13 +6,13 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, formatEther } from "viem";
+import { createWalletClient, publicActions, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
-import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey } from "../utils.js";
+import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey, getRpcTransport } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -134,7 +134,7 @@ async function main() {
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions);
 
         console.log(`✅ Collector address: ${account.address}\n`);
@@ -157,7 +157,7 @@ async function main() {
         console.log("💰 Collecting escrow...\n");
 
         // Collect the escrow
-        const collectionHash = await client.erc20.escrow.nonTierable.collect(
+        const collectionHash = await client.erc20.escrow.default.collect(
             escrowUid as `0x${string}`,
             fulfillmentUid as `0x${string}`,
         );

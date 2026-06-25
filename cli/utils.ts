@@ -4,6 +4,7 @@
 
 import { foundry, sepolia, mainnet, baseSepolia } from "viem/chains";
 import type { Chain } from "viem/chains";
+import { http, webSocket } from "viem";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
@@ -75,6 +76,15 @@ export function getChainFromNetwork(network: string): Chain {
         default:
             return foundry;
     }
+}
+
+/**
+ * Select the Viem transport from the RPC URL scheme.
+ */
+export function getRpcTransport(rpcUrl: string) {
+    return rpcUrl.startsWith("ws://") || rpcUrl.startsWith("wss://")
+        ? webSocket(rpcUrl)
+        : http(rpcUrl);
 }
 
 /**

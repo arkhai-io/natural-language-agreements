@@ -8,6 +8,9 @@ import {
 import { makeLLMClient } from "..";
 import { ProviderName } from "../nla";
 
+const COMMIT_REVEAL_BOND_AMOUNT = 1n;
+const COMMIT_REVEAL_DEADLINE = 3600n;
+
 let testContext: TestContext;
 let charlieClient: ReturnType<typeof testContext.charlie.client.extend<{ llm: ReturnType<typeof makeLLMClient> }>>;
 
@@ -61,7 +64,7 @@ Fulfillment: {{obligation}}`,
     });
 
     const { attested: escrow } =
-        await testContext.alice.client.erc20.escrow.nonTierable.permitAndCreate(
+        await testContext.alice.client.erc20.escrow.default.permitAndCreate(
             {
                 address: testContext.mockAddresses.erc20A,
                 value: 10n,
@@ -101,13 +104,17 @@ Fulfillment: {{obligation}}`,
     const payload = toHex("The sky appears blue today");
     const obligationData = { payload, salt, schema };
 
-    // Commit-reveal flow: commit, wait a block, reveal, reclaim bond
+    // Commit-reveal flow: commit, wait a block, reveal.
     const commitment = await testContext.bob.client.commitReveal.computeCommitment(
         escrow.uid,
         testContext.bob.address,
         obligationData,
     );
-    await testContext.bob.client.commitReveal.commit(commitment);
+    await testContext.bob.client.commitReveal.commit(
+        commitment,
+        COMMIT_REVEAL_BOND_AMOUNT,
+        COMMIT_REVEAL_DEADLINE,
+    );
     await testContext.testClient.mine({ blocks: 1 });
 
     const { attested: fulfillment } =
@@ -115,8 +122,6 @@ Fulfillment: {{obligation}}`,
             obligationData,
             escrow.uid,
         );
-
-    await testContext.bob.client.commitReveal.reclaimBond(fulfillment.uid);
 
     await testContext.bob.client.arbiters.general.trustedOracle.requestArbitration(
         fulfillment.uid,
@@ -127,7 +132,7 @@ Fulfillment: {{obligation}}`,
     //Should call WaitForArbitration()
     await Bun.sleep(5000);
 
-    const collectionHash = await testContext.bob.client.erc20.escrow.nonTierable.collect(
+    const collectionHash = await testContext.bob.client.erc20.escrow.default.collect(
         escrow.uid,
         fulfillment.uid,
     );
@@ -156,7 +161,7 @@ Fulfillment: {{obligation}}`,
 
     const escrowAmount = 100n;
     const { attested: escrow } =
-        await testContext.alice.client.erc20.escrow.nonTierable.permitAndCreate(
+        await testContext.alice.client.erc20.escrow.default.permitAndCreate(
             {
                 address: testContext.mockAddresses.erc20A,
                 value: escrowAmount,
@@ -212,7 +217,11 @@ Fulfillment: {{obligation}}`,
         testContext.bob.address,
         obligationData,
     );
-    await testContext.bob.client.commitReveal.commit(commitment);
+    await testContext.bob.client.commitReveal.commit(
+        commitment,
+        COMMIT_REVEAL_BOND_AMOUNT,
+        COMMIT_REVEAL_DEADLINE,
+    );
     await testContext.testClient.mine({ blocks: 1 });
 
     // Reveal phase
@@ -223,10 +232,6 @@ Fulfillment: {{obligation}}`,
         );
     expect(fulfillment.uid).toBeTruthy();
     console.log(`✅ Bob created fulfillment: ${fulfillment.uid}`);
-
-    // Reclaim bond
-    await testContext.bob.client.commitReveal.reclaimBond(fulfillment.uid);
-    console.log(`✅ Bob reclaimed bond`);
 
     // Bob requests arbitration from Charlie
     await testContext.bob.client.arbiters.general.trustedOracle.requestArbitration(
@@ -246,7 +251,7 @@ Fulfillment: {{obligation}}`,
         testContext.bob.address,
     );
 
-    const collectionHash = await testContext.bob.client.erc20.escrow.nonTierable.collect(
+    const collectionHash = await testContext.bob.client.erc20.escrow.default.collect(
         escrow.uid,
         fulfillment.uid,
     );

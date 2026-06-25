@@ -304,7 +304,7 @@ nla escrow:create \
 # Deploy to custom network
 nla deploy \
   --network sepolia \
-  --rpc-url https://sepolia.infura.io/v3/YOUR-KEY \
+  --rpc-url wss://sepolia.infura.io/ws/v3/YOUR-KEY \
   --private-key 0x...
 
 # Start oracle with custom RPC
@@ -340,7 +340,7 @@ export PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
 
 # 3. Deploy
-nla deploy sepolia https://sepolia.infura.io/v3/YOUR-KEY
+nla deploy sepolia wss://sepolia.infura.io/ws/v3/YOUR-KEY
 
 # 4. Start oracle
 nla start-oracle sepolia
@@ -354,10 +354,10 @@ export PRIVATE_KEY=0x...
 export OPENAI_API_KEY=sk-...
 
 # Deploy contracts
-nla deploy mainnet https://mainnet.infura.io/v3/YOUR-KEY
+nla deploy mainnet wss://mainnet.infura.io/ws/v3/YOUR-KEY
 
 # Start oracle (consider running as a service)
-nla start-oracle --rpc-url https://mainnet.infura.io/v3/YOUR-KEY
+nla start-oracle --rpc-url wss://mainnet.infura.io/ws/v3/YOUR-KEY
 ```
 
 ## Environment Configuration
@@ -428,7 +428,7 @@ After=network.target
 Type=simple
 User=nla
 WorkingDirectory=/home/nla
-ExecStart=/usr/bin/nla start-oracle --rpc-url https://mainnet.infura.io/v3/YOUR-KEY
+ExecStart=/usr/bin/nla start-oracle --rpc-url wss://mainnet.infura.io/ws/v3/YOUR-KEY
 Restart=always
 RestartSec=10
 

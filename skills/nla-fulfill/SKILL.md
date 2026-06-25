@@ -49,9 +49,8 @@ This runs a multi-step on-chain commit-reveal flow:
 1. Computes a commitment hash
 2. Submits the commitment with a bond
 3. Waits for next block confirmation
-4. Reveals the fulfillment obligation
-5. Reclaims the bond
-6. Requests arbitration from the oracle
+4. Reveals the fulfillment obligation and returns the bond
+5. Requests arbitration from the oracle
 
 The command outputs a **fulfillment UID** - record this for collection.
 

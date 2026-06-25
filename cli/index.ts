@@ -5,10 +5,6 @@ import { existsSync, readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
-import { createPublicClient, http, parseAbiParameters, decodeAbiParameters } from "viem";
-import { foundry } from "viem/chains";
-import { contracts } from "alkahest-ts";
-
 import { runDevCommand } from "./commands/dev.js";
 import { runStopCommand } from "./commands/stop.js";
 import { runSwitchCommand } from "./commands/switch.js";

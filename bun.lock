@@ -11,7 +11,7 @@
         "@perplexity-ai/ai-sdk": "^0.1.2",
         "@viem/anvil": "^0.0.10",
         "ai": "^6.0.5",
-        "alkahest-ts": "0.7.2",
+        "alkahest-ts": "https://github.com/arkhai-io/alkahest/archive/6e0fa2b9b8565daa4173d2e166d05ec5f4f42fbc.tar.gz",
         "arktype": "^2.1.23",
         "viem": "^2.42.1",
         "zod": "^3.25.76",
@@ -77,7 +77,7 @@
 
     "ai": ["ai@6.0.82", "", { "dependencies": { "@ai-sdk/gateway": "3.0.42", "@ai-sdk/provider": "3.0.8", "@ai-sdk/provider-utils": "4.0.14", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-WLml1ab2IXtREgkxrq2Pl6lFO6NKgC17MqTzmK5mO1UO6tMAJiVjkednw9p0j4+/LaUIZQoRiIT8wA37LswZ9Q=="],
 
-    "alkahest-ts": ["alkahest-ts@0.7.2", "", { "dependencies": { "@viem/anvil": "^0.0.10", "arktype": "^2.1.23", "zod": "^3.25.76" }, "peerDependencies": { "typescript": "^5.9.3", "viem": "^2.38.3" } }, "sha512-TWk1JftpPAQDSfTymzKxkeiew2/VxIMvbsgLkPm3ECsloxZe4FNUIAXOKQH3PEqIHeKboBdtBN5TrsL0WhbooQ=="],
+    "alkahest-ts": ["alkahest-ts@https://github.com/arkhai-io/alkahest/archive/6e0fa2b9b8565daa4173d2e166d05ec5f4f42fbc.tar.gz", { "dependencies": { "@viem/anvil": "^0.0.10", "arktype": "^2.1.23", "zod": "^3.25.76" }, "peerDependencies": { "typescript": "^5.9.3", "viem": "^2.38.3" } }, "sha512-a2No2plqrs4JV7TjFe5p5HXOAvwWidro6qYb4njoUkAuZh2uWFczZsV9xfAVZG+vmiR2nXwlvItell+tuycWqQ=="],
 
     "arkregex": ["arkregex@0.0.5", "", { "dependencies": { "@ark/util": "0.56.0" } }, "sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw=="],
 

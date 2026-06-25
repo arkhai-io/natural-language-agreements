@@ -1,7 +1,7 @@
 {
   "network": "Sepolia",
   "chainId": 11155111,
-  "rpcUrl": "https://base-sepolia.infura.io/v3/...",
+  "rpcUrl": "wss://sepolia.infura.io/ws/v3/...",
   "addresses": {
     "eas": "",
     "easSchemaRegistry": "",

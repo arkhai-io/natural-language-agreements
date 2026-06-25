@@ -7,13 +7,13 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, parseEther } from "viem";
+import { createWalletClient, publicActions, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mainnet, sepolia, baseSepolia, foundry } from "viem/chains";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { fixtures, contracts } from "alkahest-ts";
-import { getPrivateKey } from "../utils.js";
+import { getPrivateKey, getRpcTransport } from "../utils.js";
 
 // Helper function to display usage
 function displayHelp() {
@@ -45,7 +45,7 @@ Examples:
   bun deploy.ts --network localhost --private-key 0x...
 
   # Deploy to Sepolia
-  bun deploy.ts --network sepolia --private-key 0x... --rpc-url https://sepolia.infura.io/v3/YOUR-KEY
+  bun deploy.ts --network sepolia --private-key 0x... --rpc-url wss://sepolia.infura.io/ws/v3/YOUR-KEY
 
   # Using environment variables
   export PRIVATE_KEY=0x...
@@ -143,7 +143,7 @@ async function main() {
         const client = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions);
 
         console.log(`✅ Deployer address: ${account.address}\n`);
@@ -167,7 +167,6 @@ async function main() {
         const CommitRevealObligation = contracts.CommitRevealObligation;
         const ERC20EscrowObligation = contracts.ERC20EscrowObligation;
         const ERC20PaymentObligation = contracts.ERC20PaymentObligation;
-        const ERC20BarterUtils = contracts.ERC20BarterUtils;
 
         console.log("✅ Contract artifacts loaded\n");
 
@@ -248,27 +247,6 @@ async function main() {
             ERC20PaymentObligation.abi.abi,
             ERC20PaymentObligation.abi.bytecode.object,
             [addresses.eas, addresses.easSchemaRegistry]
-        );
-
-        console.log("🔄 Deploying barter utils...\n");
-
-        addresses.erc20BarterUtils = await deployContract(
-            "ERC20 Barter Utils",
-            ERC20BarterUtils.abi.abi,
-            ERC20BarterUtils.abi.bytecode.object,
-            [
-                addresses.eas,
-                addresses.erc20EscrowObligation,
-                addresses.erc20PaymentObligation,
-                "0x0000000000000000000000000000000000000000", // erc721Escrow (not used)
-                "0x0000000000000000000000000000000000000000", // erc721Payment (not used)
-                "0x0000000000000000000000000000000000000000", // erc1155Escrow (not used)
-                "0x0000000000000000000000000000000000000000", // erc1155Payment (not used)
-                "0x0000000000000000000000000000000000000000", // tokenBundleEscrow (not used)
-                "0x0000000000000000000000000000000000000000", // tokenBundlePayment (not used)
-                "0x0000000000000000000000000000000000000000", // nativeEscrow (not used)
-                "0x0000000000000000000000000000000000000000", // nativePayment (not used)
-            ]
         );
 
         // Deploy mock ERC20 tokens for testing

@@ -8,7 +8,7 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, createPublicClient, http, publicActions, fromHex } from "viem";
+import { createWalletClient, createPublicClient, publicActions, fromHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { makeClient } from "alkahest-ts";
 import { contracts } from "alkahest-ts";
@@ -20,6 +20,7 @@ import {
     loadDeploymentWithDefaults,
     getPrivateKey,
     loadEnvFile,
+    getRpcTransport,
 } from "../utils.js";
 import { existsSync } from "fs";
 import { resolve } from "path";
@@ -156,12 +157,12 @@ async function main() {
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions) as any;
 
         const publicClient = createPublicClient({
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         });
 
         const client = makeClient(walletClient, addresses);
@@ -244,7 +245,7 @@ async function main() {
             // Try to decode as an escrow obligation to verify it's actually an escrow
             let escrowData: any;
             try {
-                escrowData = client.erc20.escrow.nonTierable.decodeObligation(escrowAttestation.data);
+                escrowData = client.erc20.escrow.default.decodeObligation(escrowAttestation.data);
             } catch {
                 continue; // Not an escrow
             }

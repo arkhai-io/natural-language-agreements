@@ -7,14 +7,17 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, formatEther, toHex, keccak256 } from "viem";
+import { createWalletClient, publicActions, formatEther, toHex, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
-import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey } from "../utils.js";
+import { getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey, getRpcTransport } from "../utils.js";
+
+const COMMIT_REVEAL_BOND_AMOUNT = 1n;
+const COMMIT_REVEAL_DEADLINE = 3600n;
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -148,7 +151,7 @@ async function main() {
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions);
 
         console.log(`✅ Fulfiller address: ${account.address}\n`);
@@ -186,7 +189,11 @@ async function main() {
         console.log(`   Commitment: ${commitment}`);
 
         console.log("📝 Submitting commitment (with bond)...");
-        const { hash: commitHash } = await client.commitReveal.commit(commitment);
+        const { hash: commitHash } = await client.commitReveal.commit(
+            commitment,
+            COMMIT_REVEAL_BOND_AMOUNT,
+            COMMIT_REVEAL_DEADLINE,
+        );
         console.log(`   Commit tx: ${commitHash}`);
 
         // Step 2: Wait for next block
@@ -200,10 +207,6 @@ async function main() {
             escrowUid as `0x${string}`,
         );
 
-        // Step 4: Reclaim bond
-        console.log("💰 Reclaiming bond...");
-        await client.commitReveal.reclaimBond(fulfillmentAttestation.uid);
-
         console.log("✅ Fulfillment created!\n");
         console.log("📋 Fulfillment Details:");
         console.log(`   UID: ${fulfillmentAttestation.uid}`);
@@ -211,7 +214,7 @@ async function main() {
 
         console.log("📤 Requesting arbitration from oracle...\n");
         const escrow = await client.getAttestation(escrowUid as `0x${string}`);
-        const decodedEscrow = client.erc20.escrow.nonTierable.decodeObligation(escrow.data);
+        const decodedEscrow = client.erc20.escrow.default.decodeObligation(escrow.data);
         // Request arbitration
         await client.arbiters.general.trustedOracle.requestArbitration(
             fulfillmentAttestation.uid,

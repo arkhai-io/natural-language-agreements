@@ -7,7 +7,7 @@
  */
 
 import { parseArgs } from "util";
-import { createWalletClient, http, publicActions, parseEther, formatEther } from "viem";
+import { createWalletClient, publicActions, parseEther, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname, join } from "path";
@@ -15,7 +15,7 @@ import { fileURLToPath } from "url";
 import { makeClient } from "alkahest-ts";
 import { makeLLMClient } from "../..";
 import {fixtures} from "alkahest-ts";
-import { getCurrentEnvironment, getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey } from "../utils.js";
+import { getCurrentEnvironment, getChainFromNetwork, loadDeploymentWithDefaults, getPrivateKey, getRpcTransport } from "../utils.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -179,7 +179,7 @@ Fulfillment: {{obligation}}`;
         const walletClient = createWalletClient({
             account,
             chain,
-            transport: http(rpcUrl),
+            transport: getRpcTransport(rpcUrl),
         }).extend(publicActions);
 
         console.log(`✅ User address: ${account.address}\n`);
@@ -234,7 +234,7 @@ Fulfillment: {{obligation}}`;
         }) as `0x${string}`;
 
         // Create the escrow
-        const { attested: escrow } = await client.erc20.escrow.nonTierable.permitAndCreate(
+        const { attested: escrow } = await client.erc20.escrow.default.permitAndCreate(
             {
                 address: tokenAddress as `0x${string}`,
                 value: BigInt(amount),

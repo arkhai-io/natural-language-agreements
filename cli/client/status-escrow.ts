@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { parseArgs } from "util";
-import { createPublicClient, http, parseAbiParameters, decodeAbiParameters } from "viem";
+import { createPublicClient, parseAbiParameters, decodeAbiParameters } from "viem";
 import { contracts } from "alkahest-ts";
-import { getChainFromNetwork, loadDeploymentWithDefaults } from "../utils.js";
+import { getChainFromNetwork, loadDeploymentWithDefaults, getRpcTransport } from "../utils.js";
 
 // Helper function to display usage
 function displayHelp() {
@@ -86,7 +86,7 @@ async function main() {
         const chain = getChainFromNetwork(deployment.network);
         const publicClient = createPublicClient({
             chain,
-            transport: http(deployment.rpcUrl),
+            transport: getRpcTransport(deployment.rpcUrl),
         });
 
         // Get escrow attestation
